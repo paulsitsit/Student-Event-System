@@ -30,7 +30,7 @@
 .pcc-login-card {
   width: min(100%, 650px);
   box-sizing: border-box;
-  padding: 42px 40px 42px;
+  padding: 42px 40px;
 
   border: 1px solid rgba(255, 224, 198, .17);
   border-radius: 27px;
@@ -55,7 +55,7 @@
   margin-bottom: 45px;
 }
 
-/* Logos */
+/* Logos container */
 
 .pcc-login-logos {
   width: 100%;
@@ -66,22 +66,40 @@
   margin: 0 auto 25px;
 }
 
+/* Logo frames */
+
 .pcc-login-logo-frame {
   display: grid;
   place-items: center;
   flex: 0 1 auto;
   overflow: hidden;
-
   background: #fff;
-
   box-shadow: 0 8px 24px rgba(0, 0, 0, .20);
 }
 
+/* Larger circular PCC logo */
+
 .pcc-login-logo-frame-main {
-  width: 146px;
-  height: 146px;
+  width: 180px;
+  height: 180px;
+  flex: 0 0 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* PCC logo image */
+
+.pcc-login-logo-frame-main .pcc-login-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
   border-radius: 50%;
 }
+
+/* SOICT logo - unchanged size */
 
 .pcc-login-logo-frame-soict {
   width: 118px;
@@ -128,13 +146,12 @@
 .pcc-login-brand h1 {
   margin: 0;
   color: #fff5ec;
-
   font-size: clamp(29px, 5vw, 36px);
   line-height: 1.2;
   font-weight: 800;
 }
 
-/* Administrator sign-in subtitle */
+/* Administrator subtitle */
 
 .pcc-login-subtitle {
   margin: 12px 0 0;
@@ -152,7 +169,6 @@
 .pcc-login-form label {
   display: grid;
   gap: 10px;
-
   color: #e8cbb5;
   font-size: 16px;
   font-weight: 600;
@@ -165,7 +181,6 @@
   width: 100%;
   min-height: 64px;
   box-sizing: border-box;
-
   padding: 0 18px;
 
   border: 1px solid rgba(255, 232, 214, .22);
@@ -272,6 +287,7 @@
 ========================================= */
 
 @media (max-width: 520px) {
+
   .pcc-login-wrap {
     padding: 18px 12px;
   }
@@ -281,10 +297,23 @@
     border-radius: 21px;
   }
 
+  /* Larger circular PCC logo on mobile */
+
   .pcc-login-logo-frame-main {
-    width: 122px;
-    height: 122px;
+    width: 145px;
+    height: 145px;
+    flex: 0 0 145px;
+    border-radius: 50%;
   }
+
+  .pcc-login-logo-frame-main .pcc-login-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+
+  /* SOICT logo remains smaller */
 
   .pcc-login-logo-frame-soict {
     width: 98px;
