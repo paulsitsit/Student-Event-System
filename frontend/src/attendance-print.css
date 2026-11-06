@@ -1,0 +1,59 @@
+/* Printable event attendance sheet — styled after the supplied PCC sample. */
+.report-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:8px; }
+.report-print-ready { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:16px; padding:13px; border:1px solid rgba(121,214,138,.25); border-radius:11px; color:#cde7c7; background:rgba(67,112,62,.13); font-size:12px; }
+.attendance-print-preview { margin-top:22px; padding:18px; border:1px solid rgba(255,226,202,.12); border-radius:16px; background:#f3eee8; overflow:auto; }
+.attendance-print-preview-head { display:flex; justify-content:space-between; gap:12px; margin-bottom:12px; color:#39271d; font-size:12px; }
+.attendance-print-root { color:#111; font-family:Arial,Helvetica,sans-serif; }
+.attendance-print-page { width:100%; min-width:920px; min-height:650px; padding:12px; border:4px solid #075d32; background:#fff; color:#111; display:flex; flex-direction:column; }
+.attendance-print-brand { min-height:0; display:block; padding:0; border-bottom:0; }
+.attendance-print-institutional-header { display:block; width:100%; height:auto; max-height:130px; object-fit:contain; }
+.attendance-print-title { align-self:center; min-width:60%; margin:14px 0 13px; padding:6px 32px 8px; transform:skew(-9deg); background:#075d32; color:white; text-align:center; }
+.attendance-print-title span,.attendance-print-title small { display:block; transform:skew(9deg); }
+.attendance-print-title span { font-size:28px; line-height:1.1; font-weight:900; text-transform:uppercase; }
+.attendance-print-title small { margin-top:2px; font-size:15px; font-style:italic; font-weight:700; }
+.attendance-print-details { display:grid; grid-template-columns:1.2fr .8fr; gap:55px; margin:0 28px 18px; }
+.attendance-print-details>div { display:grid; gap:8px; }
+.attendance-print-details>div>div { display:grid; grid-template-columns:max-content 1fr; align-items:end; gap:10px; min-height:27px; }
+.attendance-print-details b { font-size:15px; white-space:nowrap; }
+.attendance-print-details span { min-height:24px; padding:0 5px 2px; border-bottom:1.5px solid #111; font-family:Georgia,serif; font-size:16px; font-weight:700; }
+.attendance-print-table { width:100%; min-width:0; border-collapse:collapse; table-layout:fixed; }
+.attendance-print-table .col-number { width:5.5%; }
+.attendance-print-table .col-id { width:17.5%; }
+.attendance-print-table .col-name { width:27%; }
+.attendance-print-table .col-time { width:12.5%; }
+.attendance-print-table th { padding:8px 5px; border:1.5px solid #fff; background:#075d32; color:#fff; text-align:center; text-transform:none; letter-spacing:0; font-size:16px; font-weight:800; }
+.attendance-print-table th:first-child,.attendance-print-table th:nth-child(2),.attendance-print-table th:nth-child(3) { vertical-align:middle; }
+.attendance-print-table td { height:42px; padding:5px 7px; border:1.5px solid #111; color:#111; text-align:center; font-size:13px; }
+.attendance-print-table td.attendance-print-student-name { text-align:left; padding-left:10px; }
+.attendance-print-table td.attendance-print-number { font-weight:800; }
+.attendance-print-blank-row td { height:42px; }
+.attendance-print-footer { display:flex; justify-content:space-between; gap:12px; margin-top:auto; padding:10px 5px 0; color:#526253; font-size:9px; }
+@media print {
+  @page { size:A4 landscape; margin:7mm; }
+  html,body,#root { width:100% !important; min-width:0 !important; margin:0 !important; padding:0 !important; background:#fff !important; color:#111 !important; print-color-adjust:exact !important; -webkit-print-color-adjust:exact !important; }
+  body * { visibility:hidden !important; }
+  .attendance-print-root,.attendance-print-root * { visibility:visible !important; }
+  .attendance-print-root { position:absolute !important; left:0 !important; top:0 !important; width:100% !important; }
+  .attendance-print-page { width:100% !important; min-width:0 !important; min-height:0 !important; height:190mm; padding:3mm !important; border:2.5px solid #075d32 !important; page-break-after:always; break-after:page; overflow:hidden; }
+  .attendance-print-page:last-child { page-break-after:auto; break-after:auto; }
+  .attendance-print-brand { min-height:25mm; padding:1mm 4mm 3mm; }
+  .attendance-print-logo-wrap { width:23mm; height:23mm; flex-basis:23mm; }
+  .attendance-print-brand-copy strong { font-size:17pt; }
+  .attendance-print-brand-copy span,.attendance-print-brand-copy small { font-size:8pt; }
+  .attendance-print-seal { width:19mm; height:19mm; font-size:17pt; }
+  .attendance-print-brand-right strong { font-size:14pt; }
+  .attendance-print-brand-right span { font-size:7pt; }
+  .attendance-print-title { margin:3mm 0; padding:2mm 8mm; }
+  .attendance-print-title span { font-size:21pt; }
+  .attendance-print-title small { font-size:11pt; }
+  .attendance-print-details { margin:0 6mm 4mm; gap:12mm; }
+  .attendance-print-details>div { gap:2mm; }
+  .attendance-print-details>div>div { min-height:7mm; gap:2mm; }
+  .attendance-print-details b { font-size:10pt; }
+  .attendance-print-details span { min-height:6mm; font-size:11pt; }
+  .attendance-print-table th { padding:2.2mm 1mm; font-size:11pt; }
+  .attendance-print-table td,.attendance-print-blank-row td { height:10.3mm; padding:1mm; font-size:9pt; }
+  .attendance-print-footer { padding-top:2mm; font-size:7pt; }
+  .report-panel,.page-head,.attendance-print-preview-head { display:none !important; }
+  .attendance-print-preview { margin:0 !important; padding:0 !important; border:0 !important; background:#fff !important; overflow:visible !important; }
+}
