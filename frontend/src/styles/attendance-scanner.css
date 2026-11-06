@@ -1,13 +1,17 @@
-
-/* Attendance scanner camera frame and identity confirmation UI */
+/* =========================================
+   ATTENDANCE SCANNER CAMERA
+========================================= */
 
 .attendance-video {
   position: relative !important;
   isolation: isolate;
   overflow: hidden;
+
   width: 100%;
   aspect-ratio: 16 / 9;
+
   min-height: 280px;
+
   border-radius: 14px;
   background: #120c08;
 }
@@ -15,38 +19,58 @@
 .attendance-video video {
   position: absolute !important;
   inset: 0;
+
   z-index: 1 !important;
+
   display: block;
+
   width: 100% !important;
   height: 100% !important;
+
   object-fit: cover;
   transform: scaleX(-1);
 }
 
+/* Face guide */
+
 .attendance-video .attendance-face-oval {
   position: absolute !important;
+
   display: block !important;
+
   z-index: 10 !important;
+
   left: 50%;
   top: 46%;
+
   width: min(44%, 250px);
   height: 78%;
+
   transform: translate(-50%, -50%);
+
   border: 3px dashed #e9a576 !important;
   border-radius: 50% / 43%;
+
   box-shadow:
     0 0 0 999px rgba(15, 8, 4, .27),
     0 0 18px rgba(233, 165, 118, .5);
+
   pointer-events: none;
 }
+
+/* Face guide lines */
 
 .attendance-video .attendance-face-guide-top,
 .attendance-video .attendance-face-guide-bottom {
   position: absolute;
+
   left: 50%;
+
   width: 35%;
   height: 3px;
+
   transform: translateX(-50%);
+
   border-radius: 5px;
   background: #f4c29d;
 }
@@ -59,47 +83,71 @@
   bottom: 12%;
 }
 
+/* Face guide instruction */
+
 .attendance-video .attendance-face-caption {
   position: absolute;
+
   z-index: 11;
+
   top: 12px;
   left: 50%;
+
   transform: translateX(-50%);
+
   padding: 7px 11px;
+
   border-radius: 20px;
+
   background: rgba(31, 20, 14, .90);
   color: #ffe5d0;
+
   font-size: 10px;
   font-weight: 800;
   letter-spacing: .7px;
+
   white-space: nowrap;
   pointer-events: none;
 }
 
+/* Camera instruction panel */
+
 .attendance-video .attendance-camera-instruction {
   position: absolute;
+
   z-index: 12;
+
   left: 12px;
   right: 12px;
   bottom: 12px;
+
   display: flex;
   align-items: center;
+
   gap: 11px;
+
   padding: 10px 13px;
+
   border: 1px solid rgba(255, 226, 202, .25);
   border-radius: 12px;
+
   background: rgba(31, 20, 14, .90);
   color: #fff0e3;
+
   pointer-events: none;
 }
 
 .attendance-camera-arrow {
   flex: 0 0 42px;
+
   width: 42px;
   height: 42px;
+
   display: grid;
   place-items: center;
+
   border-radius: 50%;
+
   background: #d88e5e;
   color: #28170f;
 }
@@ -111,45 +159,65 @@
 
 .attendance-camera-instruction strong {
   color: #f0a66e;
+
   font-size: 13px;
+
   margin-bottom: 3px;
 }
 
 .attendance-camera-instruction span {
   color: #f2dfd0;
+
   font-size: 11px;
   line-height: 1.4;
 }
 
-/* Identity confirmation modal */
+/* =========================================
+   IDENTITY CONFIRMATION MODAL
+========================================= */
 
 .attendance-confirm-backdrop {
   position: fixed;
+
   z-index: 99999;
+
   inset: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 20px;
+
   overflow-y: auto;
+
   background: rgba(10, 6, 4, .82);
+
   backdrop-filter: blur(7px);
 }
 
 .attendance-confirm-modal {
   width: 100%;
   max-width: 460px;
+
   min-width: 0;
   max-height: 90vh;
+
   margin: auto;
+
   padding: 25px;
+
   overflow-y: auto;
   overflow-x: hidden;
+
   box-sizing: border-box;
+
   border: 1px solid rgba(255, 226, 202, .16);
   border-radius: 18px;
+
   background: #352319;
   color: #fff0e3;
+
   box-shadow: 0 25px 80px rgba(0, 0, 0, .55);
 }
 
@@ -161,29 +229,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   margin-bottom: 18px;
 }
 
 .attendance-confirm-icon {
   width: 48px;
   height: 48px;
+
   display: grid;
   place-items: center;
+
   border-radius: 14px;
+
   background: rgba(216, 142, 94, .18);
   color: #e9a576;
 }
 
 .attendance-confirm-modal h2 {
   margin: 0 0 10px;
+
   color: #fff0e3;
+
   font-size: 21px;
   line-height: 1.3;
 }
 
 .attendance-confirm-subtitle {
   margin: 0 0 20px;
+
   color: #d2b9a5;
+
   font-size: 13px;
   line-height: 1.6;
 }
@@ -191,21 +267,30 @@
 .attendance-student-identity {
   display: flex;
   align-items: center;
+
   gap: 14px;
+
   width: 100%;
+
   padding: 16px;
+
   border: 1px solid rgba(255, 255, 255, .10);
   border-radius: 13px;
+
   background: rgba(255, 255, 255, .045);
 }
 
 .attendance-student-avatar {
   width: 58px;
   height: 58px;
+
   flex: 0 0 58px;
+
   display: grid;
   place-items: center;
+
   border-radius: 14px;
+
   background: rgba(216, 142, 94, .18);
   color: #e9a576;
 }
@@ -218,23 +303,31 @@
 
 .attendance-student-identity strong {
   margin-bottom: 6px;
+
   color: #fff0e3;
+
   font-size: 15px;
 }
 
 .attendance-student-identity span {
   margin-top: 4px;
+
   color: #cdb39e;
+
   font-size: 12px;
 }
 
 .attendance-match-meta {
   display: flex;
   justify-content: space-between;
+
   gap: 12px;
+
   margin-top: 15px;
   padding: 12px 2px;
+
   color: #cdb39e;
+
   font-size: 12px;
 }
 
@@ -245,12 +338,17 @@
 .attendance-confirm-warning {
   display: flex;
   align-items: flex-start;
+
   gap: 10px;
+
   margin: 8px 0 20px;
   padding: 12px;
+
   border-radius: 10px;
+
   background: rgba(229, 184, 85, .10);
   color: #eacb91;
+
   font-size: 12px;
   line-height: 1.5;
 }
@@ -262,21 +360,29 @@
 .attendance-confirm-actions {
   display: flex;
   justify-content: flex-end;
+
   flex-wrap: wrap;
+
   gap: 10px;
 }
 
 .attendance-confirm-modal .icon-btn {
   width: 38px;
   height: 38px;
+
   display: grid;
   place-items: center;
+
   border: 1px solid rgba(255, 255, 255, .10);
   border-radius: 10px;
+
   background: rgba(255, 255, 255, .07);
   color: #fff0e3;
+
   cursor: pointer;
 }
+
+/* Loading animation */
 
 @keyframes scanner-spin {
   to {
@@ -288,40 +394,42 @@
   animation: scanner-spin 1s linear infinite;
 }
 
-/* Mobile responsive layout */
+/* =========================================
+   MOBILE RESPONSIVE CAMERA
+========================================= */
 
 @media (max-width: 520px) {
-  /*
-   * Make the camera preview taller.
-   * This gives students more room to position their faces.
-   */
   .attendance-video {
+    width: 100%;
+
     aspect-ratio: 4 / 3;
-    min-height: 360px;
-    max-height: 460px;
+
+    min-height: 0;
+    max-height: 420px;
   }
 
-  /*
-   * Larger face guide on mobile.
-   * The full selector is intentional so this overrides
-   * the original desktop oval dimensions.
-   */
+  /* Larger face guide for mobile */
+
   .attendance-video .attendance-face-oval {
     width: 72%;
     max-width: 340px;
     height: 78%;
   }
 
+  /* Camera instruction */
+
   .attendance-video .attendance-camera-instruction {
     left: 7px;
     right: 7px;
     bottom: 7px;
+
     padding: 8px;
     gap: 8px;
   }
 
   .attendance-video .attendance-camera-arrow {
     flex-basis: 36px;
+
     width: 36px;
     height: 36px;
   }
@@ -334,11 +442,17 @@
     font-size: 10px;
   }
 
+  /* Face guide caption */
+
   .attendance-video .attendance-face-caption {
     top: 9px;
+
     font-size: 9px;
+
     padding: 6px 9px;
   }
+
+  /* Confirmation modal */
 
   .attendance-confirm-backdrop {
     padding: 12px;
@@ -358,11 +472,14 @@
   }
 }
 
-/* Very small mobile screens */
+/* =========================================
+   EXTRA SMALL MOBILE SCREENS
+========================================= */
 
 @media (max-width: 360px) {
   .attendance-video {
-    min-height: 330px;
+    min-height: 0;
+    max-height: 380px;
   }
 
   .attendance-video .attendance-face-oval {
@@ -378,4 +495,4 @@
   .attendance-video .attendance-camera-instruction span {
     font-size: 9px;
   }
-}
+  }
