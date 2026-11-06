@@ -1,0 +1,77 @@
+/* Reports: fixed BSIT course and responsive filter layout */
+.report-panel-fixed-course {
+  width: min(100%, 760px);
+  max-width: 760px;
+}
+
+.report-panel-fixed-course > div:last-child {
+  width: 100%;
+  min-width: 0;
+}
+
+.report-panel-content h2 {
+  margin-top: 0;
+}
+
+.report-course-static {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 350px);
+  min-height: 47px;
+  margin: 20px 0 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 226, 202, .15);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .045);
+}
+
+.report-course-static span {
+  color: #c9ad98;
+  font-size: 12px;
+}
+
+.report-course-static strong {
+  color: #fff0e3;
+  font-size: 14px;
+}
+
+.report-course-static small {
+  margin-left: auto;
+  color: #d99a70;
+  font-size: 10px;
+}
+
+.report-panel-fixed-course .report-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: 680px;
+  margin: 16px 0;
+}
+
+.report-panel-fixed-course .report-filters .field {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+}
+
+.report-panel-fixed-course .report-filters select {
+  width: 100%;
+  min-width: 0;
+}
+
+.report-export-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .report-panel-fixed-course .report-filters {
+    grid-template-columns: 1fr;
+  }
+}

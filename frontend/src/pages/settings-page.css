@@ -1,0 +1,82 @@
+/* Centered administrator password settings layout */
+.settings-panel-centered {
+  width: min(100%, 680px);
+  margin-inline: auto;
+  padding: clamp(20px, 4vw, 32px);
+}
+
+.settings-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.settings-heading-icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #e9a576;
+  background: rgba(216, 142, 94, .16);
+}
+
+.settings-panel-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 5px;
+  color: #fff0e3;
+  font: 700 19px Manrope, sans-serif;
+}
+
+.settings-panel-heading .muted {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.settings-form-centered {
+  display: grid;
+  width: min(100%, 560px);
+  max-width: none;
+  gap: 17px;
+  margin-inline: auto;
+}
+
+.settings-form-centered .field {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 8px;
+}
+
+.settings-form-centered .field input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+}
+
+.settings-feedback {
+  width: 100%;
+  margin: 0;
+}
+
+.settings-submit {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 2px;
+}
+
+@media (max-width: 520px) {
+  .settings-panel-centered { padding: 19px 16px; }
+  .settings-panel-heading { justify-content: flex-start; }
+}

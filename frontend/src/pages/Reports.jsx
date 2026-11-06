@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FileDown, Printer } from 'lucide-react';
-import { api, downloadCsv } from '../services/api';
+import { api } from '../services/api';
 import { PageHead, Field } from '../components/common/UI';
 import institutionalHeader from '../assets/pcc-institutional-header.jpg';
 import {
@@ -9,6 +9,7 @@ import {
   exportAttendanceWord,
 } from '../utils/attendance-report-export';
 import '../attendance-print.css';
+import './reports-page.css';
 
 const YEARS = [
   { value: '1', label: '1st Year' },
@@ -17,6 +18,7 @@ const YEARS = [
   { value: '4', label: '4th Year' },
 ];
 const SECTIONS = ['A', 'B', 'C'];
+const COURSE = 'BSIT';
 const PAGE_SIZE = 10;
 
 const dateLabel = (value) => {
@@ -26,6 +28,7 @@ const dateLabel = (value) => {
     ? ''
     : date.toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
 };
+
 const timeLabel = (value) => {
   if (!value) return '';
   const date = new Date(value);
@@ -33,7 +36,11 @@ const timeLabel = (value) => {
     ? ''
     : date.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
 };
-const studentName = (student) => `${student.lastName || ''}, ${student.firstName || ''}`.trim().replace(/^,\\s*/, '');
+
+const studentName = (student = {}) =>
+  [student.lastName, student.firstName].filter(Boolean).join(', ') ||
+  student.name ||
+  '';
 
 function splitPages(items) {
   const pages = [];
@@ -54,9 +61,12 @@ function PrintSheet({ event, students, attendance, filters }) {
   }, [attendance]);
 
   const pages = useMemo(() => splitPages(students), [students]);
-  const courseLabel = [filters.course, filters.yearLevel ? `${filters.yearLevel}${filters.yearLevel === '1' ? 'st' : filters.yearLevel === '2' ? 'nd' : filters.yearLevel === '3' ? 'rd' : 'th'} Year` : '', filters.section ? `Section ${filters.section}` : '']
-    .filter(Boolean).join(' ');
-  const classLabel = courseLabel || 'All Courses / Year Levels / Sections';
+  const yearLabel = filters.yearLevel
+    ? `${filters.yearLevel}${filters.yearLevel === '1' ? 'st' : filters.yearLevel === '2' ? 'nd' : filters.yearLevel === '3' ? 'rd' : 'th'} Year`
+    : '';
+  const classLabel = [COURSE, yearLabel, filters.section ? `Section ${filters.section}` : '']
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className="attendance-print-root">
@@ -66,7 +76,7 @@ function PrintSheet({ event, students, attendance, filters }) {
             <img
               className="attendance-print-institutional-header"
               src={institutionalHeader}
-              alt="Passi City College, Passi City, Iloilo, Bagong Pilipinas, and Palangga Passi institutional logos"
+              alt="Passi City College and partner institutional logos"
             />
           </header>
 
@@ -112,25 +122,23 @@ function PrintSheet({ event, students, attendance, filters }) {
             <tbody>
               {pageStudents.map((student, rowIndex) => {
                 const record = attendanceByStudent.get(String(student._id));
-                const isPm = record?.timeIn && new Date(record.timeIn).getHours() >= 12;
-                const amIn = record?.timeIn && !isPm ? timeLabel(record.timeIn) : '';
-                const amOut = record?.timeOut && !isPm ? timeLabel(record.timeOut) : '';
-                const pmIn = record?.timeIn && isPm ? timeLabel(record.timeIn) : '';
-                const pmOut = record?.timeOut && isPm ? timeLabel(record.timeOut) : '';
+                const isPm = Boolean(record?.timeIn && new Date(record.timeIn).getHours() >= 12);
                 return (
                   <tr key={student._id}>
                     <td className="attendance-print-number">{pageIndex * PAGE_SIZE + rowIndex + 1}</td>
-                    <td>{student.studentNumber}</td>
+                    <td>{student.studentNumber || student.studentId || ''}</td>
                     <td className="attendance-print-student-name">{studentName(student)}</td>
-                    <td>{amIn}</td><td>{amOut}</td>
-                    <td>{pmIn}</td><td>{pmOut}</td>
+                    <td>{record?.timeIn && !isPm ? timeLabel(record.timeIn) : ''}</td>
+                    <td>{record?.timeOut && !isPm ? timeLabel(record.timeOut) : ''}</td>
+                    <td>{record?.timeIn && isPm ? timeLabel(record.timeIn) : ''}</td>
+                    <td>{record?.timeOut && isPm ? timeLabel(record.timeOut) : ''}</td>
                   </tr>
                 );
               })}
               {Array.from({ length: PAGE_SIZE - pageStudents.length }).map((_, index) => (
                 <tr key={`blank-${index}`} className="attendance-print-blank-row">
                   <td>{pageIndex * PAGE_SIZE + pageStudents.length + index + 1}</td>
-                  <td></td><td></td><td></td><td></td><td></td><td></td>
+                  <td /><td /><td /><td /><td /><td />
                 </tr>
               ))}
             </tbody>
@@ -148,12 +156,7 @@ function PrintSheet({ event, students, attendance, filters }) {
 
 export default function Reports() {
   const [events, setEvents] = useState([]);
-  const [filters, setFilters] = useState({
-    eventId: '',
-    course: '',
-    yearLevel: '',
-    section: '',
-  });
+  const [filters, setFilters] = useState({ eventId: '', yearLevel: '', section: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [printData, setPrintData] = useState(null);
@@ -165,53 +168,53 @@ export default function Reports() {
       .catch((err) => setError(err.message || 'Unable to load events.'));
   }, []);
 
-  async function exportReport() {
-    setBusy(true);
-    setError('');
-    try {
-      await downloadCsv(filters);
-    } catch (err) {
-      setError(err.message || 'Unable to download report.');
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function preparePrint() {
     if (!filters.eventId) {
       setError('Please select an event before preparing the attendance sheet.');
       return;
     }
+
     setBusy(true);
     setError('');
+    setPrintData(null);
+
     try {
       const selectedEvent = events.find((item) => item._id === filters.eventId);
       if (!selectedEvent) throw new Error('Selected event could not be found.');
 
-      const query = new URLSearchParams({ limit: '100', page: '1' });
-      if (filters.course) query.set('q', filters.course);
-      const firstPage = await api(`/students?${query.toString()}`);
+      // Keep the BSIT query on every page. The backend paginates at 100 records.
+      const firstPage = await api(`/students?${new URLSearchParams({
+        limit: '100',
+        page: '1',
+        q: COURSE,
+      }).toString()}`);
+
       let allStudents = firstPage.items || [];
       const totalPages = Math.max(1, Number(firstPage.pages) || 1);
 
       for (let page = 2; page <= totalPages; page += 1) {
-        const data = await api(`/students?${new URLSearchParams({ limit: '100', page: String(page) }).toString()}`);
+        const query = new URLSearchParams({
+          limit: '100',
+          page: String(page),
+          q: COURSE,
+        });
+        const data = await api(`/students?${query.toString()}`);
         allStudents = allStudents.concat(data.items || []);
       }
 
       allStudents = allStudents
-        .filter((student) => student.active !== false)
-        .filter((student) => !filters.course || student.course === filters.course)
-        .filter((student) => !filters.yearLevel || student.yearLevel === filters.yearLevel)
+        .filter((student) => student.active !== false && student.course === COURSE)
+        .filter((student) => !filters.yearLevel || String(student.yearLevel) === filters.yearLevel)
         .filter((student) => !filters.section || student.section === filters.section)
-        .sort((a, b) => `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`));
+        .sort((a, b) => `${a.lastName || ''} ${a.firstName || ''}`.localeCompare(`${b.lastName || ''} ${b.firstName || ''}`));
 
       const attendanceData = await api(`/attendance?eventId=${encodeURIComponent(filters.eventId)}`);
+
       setPrintData({
         event: selectedEvent,
         students: allStudents,
         attendance: attendanceData.items || [],
-        filters: { ...filters },
+        filters: { ...filters, course: COURSE },
       });
     } catch (err) {
       setError(err.message || 'Unable to prepare printable attendance sheet.');
@@ -236,8 +239,7 @@ export default function Reports() {
   }
 
   function printSheet() {
-    if (!printData) return;
-    window.print();
+    if (printData) window.print();
   }
 
   return (
@@ -245,55 +247,70 @@ export default function Reports() {
       <PageHead
         eyebrow="DATA EXPORT"
         title="Reports"
-        desc="Prepare a printable event attendance sheet or export attendance records as CSV."
+        desc="Prepare a printable BSIT event attendance sheet or export attendance records as CSV, PDF, or Word."
       />
-      <section className="panel report-panel">
+
+      <section className="panel report-panel report-panel-fixed-course">
         <div className="report-icon"><Printer size={28} /></div>
-        <div>
+        <div className="report-panel-content">
           <h2>Printable attendance sheet</h2>
           <p className="muted">
-            Print a landscape attendance sheet with event details, student roster,
-            and grouped AM/PM Time-In and Time-Out columns. Select an event and
-            optionally filter by course, year level, and section.
+            Print a landscape attendance sheet for BSIT students with event details,
+            student roster, and grouped AM/PM Time-In and Time-Out columns.
+            Select an event and optionally filter by year level and section.
           </p>
+
+          <div className="report-course-static" aria-label="Course filter fixed to BSIT">
+            <span>Course</span>
+            <strong>BSIT</strong>
+            <small>Fixed course</small>
+          </div>
+
           <div className="report-filters">
             <Field label="Event (required)">
-              <select value={filters.eventId} onChange={(event) => setFilters({ ...filters, eventId: event.target.value })}>
+              <select
+                value={filters.eventId}
+                onChange={(event) => setFilters((current) => ({ ...current, eventId: event.target.value }))}
+              >
                 <option value="">Select event</option>
-                {events.map((event) => <option key={event._id} value={event._id}>{event.title}</option>)}
+                {events.map((event) => (
+                  <option key={event._id} value={event._id}>{event.title}</option>
+                ))}
               </select>
             </Field>
-            <Field label="Course">
-              <select value={filters.course} onChange={(event) => setFilters({ ...filters, course: event.target.value })}>
-                <option value="">All courses</option>
-                <option value="BSIT">BSIT</option>
-              </select>
-            </Field>
+
             <Field label="Year level">
-              <select value={filters.yearLevel} onChange={(event) => setFilters({ ...filters, yearLevel: event.target.value })}>
+              <select
+                value={filters.yearLevel}
+                onChange={(event) => setFilters((current) => ({ ...current, yearLevel: event.target.value }))}
+              >
                 <option value="">All year levels</option>
                 {YEARS.map((year) => <option key={year.value} value={year.value}>{year.label}</option>)}
               </select>
             </Field>
+
             <Field label="Section">
-              <select value={filters.section} onChange={(event) => setFilters({ ...filters, section: event.target.value })}>
+              <select
+                value={filters.section}
+                onChange={(event) => setFilters((current) => ({ ...current, section: event.target.value }))}
+              >
                 <option value="">All sections</option>
                 {SECTIONS.map((section) => <option key={section} value={section}>{section}</option>)}
               </select>
             </Field>
           </div>
+
           {error && <div className="error" role="alert">{error}</div>}
+
           <div className="report-actions">
             <button className="btn primary" onClick={preparePrint} disabled={busy}>
               <Printer size={16} /> {busy ? 'Preparing sheet…' : 'Prepare print sheet'}
             </button>
-            <button className="btn ghost" onClick={exportReport} disabled={busy}>
-              <FileDown size={16} /> Download CSV
-            </button>
           </div>
+
           {printData && (
             <div className="report-print-ready">
-              <span>Report ready: {printData.students.length} students. Choose an export format.</span>
+              <span>Report ready: {printData.students.length} BSIT students. Choose an export format.</span>
               <div className="report-export-buttons">
                 <button className="btn primary" onClick={() => exportFormatted('csv')} disabled={Boolean(exporting)}>
                   <FileDown size={16} /> {exporting === 'csv' ? 'Creating CSV…' : 'Download CSV'}
@@ -317,7 +334,7 @@ export default function Reports() {
         <div className="attendance-print-preview">
           <div className="attendance-print-preview-head">
             <strong>Print preview</strong>
-            <span>{printData.event.title} · {printData.students.length} students</span>
+            <span>{printData.event.title} · {printData.students.length} BSIT students</span>
           </div>
           <PrintSheet {...printData} />
         </div>
