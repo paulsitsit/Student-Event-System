@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { api, setToken } from '../services/api';
@@ -39,6 +40,8 @@ export default function Login({ onLogin }) {
   return (
     <main className="pcc-login-wrap">
       <section className="pcc-login-card">
+
+        {/* College logos and branding */}
         <header className="pcc-login-brand">
           <div className="pcc-login-logos">
             <div className="pcc-login-logo-frame pcc-login-logo-frame-main">
@@ -48,6 +51,7 @@ export default function Login({ onLogin }) {
                 className="pcc-login-logo"
               />
             </div>
+
             <div className="pcc-login-logo-frame pcc-login-logo-frame-soict">
               <img
                 src={SoictLogo}
@@ -57,21 +61,35 @@ export default function Login({ onLogin }) {
             </div>
           </div>
 
-          <p className="pcc-login-eyebrow">PASSI CITY COLLEGE</p>
-          <h1>Attendance Portal</h1>
-          <p className="pcc-login-subtitle">Administrator sign in</p>
+          <p className="pcc-login-eyebrow">
+            PASSI CITY COLLEGE
+          </p>
+
           <p className="pcc-login-program">
-            Under the Passi City College<br />
-            Bachelor of Science in Information<br />
-            and Communication Technology
+            BACHELOR OF SCIENCE IN
+            <br />
+            INFORMATION TECHNOLOGY
+          </p>
+
+          <h1>Attendance Portal</h1>
+
+          <p className="pcc-login-subtitle">
+            Administrator sign in
           </p>
         </header>
 
-        {error && <div className="pcc-login-error" role="alert">{error}</div>}
+        {/* Login error */}
+        {error && (
+          <div className="pcc-login-error" role="alert">
+            {error}
+          </div>
+        )}
 
+        {/* Login form */}
         <form className="pcc-login-form" onSubmit={submit}>
           <label htmlFor="pcc-login-email">
             Email address
+
             <input
               id="pcc-login-email"
               type="email"
@@ -84,6 +102,7 @@ export default function Login({ onLogin }) {
 
           <label htmlFor="pcc-login-password">
             Password
+
             <span className="pcc-password-control">
               <input
                 id="pcc-login-password"
@@ -93,26 +112,37 @@ export default function Login({ onLogin }) {
                 onChange={(event) => setPassword(event.target.value)}
                 required
               />
+
               <button
                 className="pcc-password-toggle"
                 type="button"
-                onClick={() => setShowPassword((visible) => !visible)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() =>
+                  setShowPassword((visible) => !visible)
+                }
+                aria-label={
+                  showPassword ? 'Hide password' : 'Show password'
+                }
                 aria-pressed={showPassword}
               >
-                {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                {showPassword
+                  ? <EyeOff size={19} />
+                  : <Eye size={19} />
+                }
               </button>
             </span>
           </label>
 
-          <button className="pcc-login-submit" type="submit" disabled={busy}>
+          <button
+            className="pcc-login-submit"
+            type="submit"
+            disabled={busy}
+          >
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
-        <p className="pcc-login-note">
-          Use the administrator account configured in backend/.env.
-        </p>
+        {/* No footer text below the Sign in button */}
+
       </section>
     </main>
   );
