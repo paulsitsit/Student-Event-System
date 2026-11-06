@@ -4,7 +4,7 @@
   width: 100%;
   display: grid;
   place-items: center;
-  padding: 32px 18px;
+  padding: 28px 18px;
   box-sizing: border-box;
   background:
     radial-gradient(ellipse at 85% 8%, rgba(139, 55, 14, .24), transparent 42%),
@@ -12,9 +12,9 @@
 }
 
 .pcc-login-card {
-  width: min(100%, 470px);
+  width: min(100%, 520px);
   box-sizing: border-box;
-  padding: 38px 40px 32px;
+  padding: 34px 40px 30px;
   border: 1px solid rgba(255, 224, 198, .17);
   border-radius: 27px;
   background: linear-gradient(160deg, rgba(84, 51, 33, .88), rgba(47, 29, 20, .96));
@@ -27,20 +27,47 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 27px;
 }
 
-.pcc-login-logo {
-  display: block;
-  width: 142px;
-  height: 142px;
-  max-width: 42vw;
-  object-fit: contain;
-  object-position: center;
-  margin: 0 auto 17px;
-  border-radius: 50%;
+.pcc-login-logos {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 5vw, 38px);
+  margin: 0 auto 18px;
+}
+
+.pcc-login-logo-frame {
+  display: grid;
+  place-items: center;
+  flex: 0 1 auto;
+  overflow: hidden;
   background: #fff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, .20);
+}
+
+.pcc-login-logo-frame-main {
+  width: 146px;
+  height: 146px;
+  border-radius: 50%;
+}
+
+.pcc-login-logo-frame-soict {
+  width: 118px;
+  height: 118px;
+  padding: 7px;
+  border-radius: 18px;
+}
+
+.pcc-login-logo,
+.pcc-login-soict-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 
 .pcc-login-eyebrow {
@@ -63,6 +90,16 @@
   margin: 8px 0 0;
   color: #d9bba4;
   font-size: 14px;
+}
+
+.pcc-login-program {
+  max-width: 360px;
+  margin: 15px 0 0;
+  color: #e8cbb5;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.55;
+  text-align: center;
 }
 
 .pcc-login-form {
@@ -97,6 +134,35 @@
   box-shadow: 0 0 0 3px rgba(227, 154, 104, .20);
 }
 
+.pcc-password-control {
+  position: relative;
+  display: block;
+}
+
+.pcc-password-control input {
+  padding-right: 54px;
+}
+
+.pcc-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #68432e;
+  cursor: pointer;
+}
+
+.pcc-password-toggle:hover {
+  background: rgba(104, 67, 46, .10);
+}
+
 .pcc-login-submit {
   width: 100%;
   min-height: 51px;
@@ -122,10 +188,11 @@
 }
 
 .pcc-login-note {
-  margin: 23px 0 0;
+  margin: 20px 0 0;
   color: #b9967d;
   font-size: 12px;
   line-height: 1.5;
+  text-align: center;
 }
 
 .pcc-login-error {
@@ -139,12 +206,10 @@
 }
 
 @media (max-width: 520px) {
-  .pcc-login-card {
-    padding: 30px 23px 25px;
-    border-radius: 21px;
-  }
-  .pcc-login-logo {
-    width: 124px;
-    height: 124px;
-  }
+  .pcc-login-wrap { padding: 18px 12px; }
+  .pcc-login-card { padding: 27px 21px 23px; border-radius: 21px; }
+  .pcc-login-logo-frame-main { width: 122px; height: 122px; }
+  .pcc-login-logo-frame-soict { width: 98px; height: 98px; }
+  .pcc-login-logos { gap: 16px; }
+  .pcc-login-program { font-size: 11px; }
 }
