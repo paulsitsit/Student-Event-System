@@ -17,6 +17,10 @@ export default function Scanner() {
   const modalOpenRef = useRef(false);
   const matchRef = useRef(null);
   const timerRef = useRef(null);
+  // Keep the latest enrolled templates available to the scan loop immediately.
+  // React state updates are asynchronous, so the first scan must not use an empty
+  // templates array captured before setTemplates() completes.
+  const templatesRef = useRef([]);
 
   const [eventId, setEventId] = useState('');
   const [events, setEvents] = useState([]);
@@ -98,14 +102,25 @@ export default function Scanner() {
     try {
       setStatus('Scanning automatically — position one face inside the frame.');
 
-      const descriptor = await getDescriptor(
-  videoRef.current,
-  { frameOnly: true }
-);
+      const video = videoRef.current;
+      const previewFrame = video?.parentElement;
+
+      const descriptor = await getDescriptor(video, {
+        frameOnly: true,
+        // Match the crop to the actual visible preview (object-fit: cover)
+        // and the oval overlay drawn inside this frame.
+        frameElement: previewFrame
+      });
 
       if (!scanningRef.current || !mountedRef.current) return;
 
-      const found = findBestMatch(descriptor, templates);
+      if (templatesRef.current.length === 0) {
+        setStatus('Face detected, but no students are enrolled. Complete five-angle face enrollment first.');
+        setError('');
+        return;
+      }
+
+      const found = findBestMatch(descriptor, templatesRef.current);
 
       if (!found) {
         setStatus(NO_MATCH_MESSAGE);
@@ -177,10 +192,19 @@ export default function Scanner() {
       const response = await api('/students/face-templates');
       if (!mountedRef.current) return;
 
-      setTemplates(response.items || []);
+      const enrolledTemplates = Array.isArray(response.items)
+        ? response.items
+        : [];
+
+      templatesRef.current = enrolledTemplates;
+      setTemplates(enrolledTemplates);
       setCameraOn(true);
       scanningRef.current = true;
-      setStatus('Camera ready. Automatic scanning is active.');
+      setStatus(
+        enrolledTemplates.length
+          ? 'Camera ready. Automatic scanning is active.'
+          : 'Camera ready, but no students have completed face enrollment yet.'
+      );
       setError('');
 
       // No Scan Face button is needed: begin scanning as soon as camera is ready.
