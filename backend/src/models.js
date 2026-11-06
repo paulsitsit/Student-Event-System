@@ -14,8 +14,9 @@ const studentSchema = new Schema({
   studentNumber: { type: String, required: true, unique: true, trim: true },
   firstName: { type: String, required: true, trim: true },
   lastName: { type: String, required: true, trim: true },
-  course: { type: String, default: '', trim: true },
+  course: { type: String, default: 'BSIT', trim: true },
   yearLevel: { type: String, default: '' },
+  section: { type: String, default: '', uppercase: true, trim: true },
   email: { type: String, default: '', trim: true, lowercase: true },
   active: { type: Boolean, default: true },
   faceDescriptor: { type: [Number], default: undefined, select: false },
@@ -26,6 +27,7 @@ const studentSchema = new Schema({
 
 studentSchema.index({ lastName: 1, firstName: 1 });
 studentSchema.index({ studentNumber: 1 });
+studentSchema.index({ course: 1, yearLevel: 1, section: 1 });
 
 const eventSchema = new Schema({
   title: { type: String, required: true, trim: true },

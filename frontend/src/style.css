@@ -606,3 +606,20 @@
   color: #e4c8af; font-size: 12px;
 }
 .correction-context svg { flex: 0 0 auto; color: #e9a576; }
+
+/* Student directory: dedicated course/year/section columns and report filters */
+.report-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 13px;
+  max-width: 680px;
+  margin: 18px 0;
+}
+.report-filters .field {
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .report-filters {
+    grid-template-columns: 1fr;
+  }
+}

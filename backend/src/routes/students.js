@@ -4,6 +4,45 @@ import { asyncHandler, cleanText } from '../utils.js';
 import { audit } from '../services/audit.js';
 
 const router = Router();
+const validCourses = ['BSIT'];
+const validYears = ['1', '2', '3', '4'];
+const validSections = ['A', 'B', 'C'];
+
+function studentFields(body, partial = false) {
+  const payload = {};
+  const textFields = ['studentNumber', 'firstName', 'lastName', 'email'];
+  for (const key of textFields) {
+    if (!partial || body[key] !== undefined) {
+      payload[key] = cleanText(body[key], key === 'email' ? 120 : 100);
+    }
+  }
+  if (!partial || body.course !== undefined) {
+    payload.course = cleanText(body.course || 'BSIT', 20).toUpperCase();
+    if (!validCourses.includes(payload.course)) {
+      const error = new Error('Please select a valid course.');
+      error.status = 400;
+      throw error;
+    }
+  }
+  if (!partial || body.yearLevel !== undefined) {
+    payload.yearLevel = cleanText(body.yearLevel, 10);
+    if (!validYears.includes(payload.yearLevel)) {
+      const error = new Error('Please select a valid year level (1 to 4).');
+      error.status = 400;
+      throw error;
+    }
+  }
+  if (!partial || body.section !== undefined) {
+    payload.section = cleanText(body.section, 5).toUpperCase();
+    if (!validSections.includes(payload.section)) {
+      const error = new Error('Please select a valid section (A, B, or C).');
+      error.status = 400;
+      throw error;
+    }
+  }
+  if (payload.email !== undefined) payload.email = payload.email.toLowerCase();
+  return payload;
+}
 
 router.get('/', asyncHandler(async (req, res) => {
   const q = cleanText(req.query.q, 100);
@@ -12,7 +51,9 @@ router.get('/', asyncHandler(async (req, res) => {
       { studentNumber: { $regex: q, $options: 'i' } },
       { firstName: { $regex: q, $options: 'i' } },
       { lastName: { $regex: q, $options: 'i' } },
-      { course: { $regex: q, $options: 'i' } }
+      { course: { $regex: q, $options: 'i' } },
+      { yearLevel: { $regex: q, $options: 'i' } },
+      { section: { $regex: q, $options: 'i' } }
     ]
   } : {};
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -25,24 +66,26 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 router.post('/', asyncHandler(async (req, res) => {
-  const payload = {
-    studentNumber: cleanText(req.body.studentNumber, 40),
-    firstName: cleanText(req.body.firstName, 80),
-    lastName: cleanText(req.body.lastName, 80),
-    course: cleanText(req.body.course, 100),
-    yearLevel: cleanText(req.body.yearLevel, 30),
-    email: cleanText(req.body.email, 120).toLowerCase()
-  };
-  if (!payload.studentNumber || !payload.firstName || !payload.lastName) return res.status(400).json({ message: 'Student number, first name, and last name are required' });
+  const payload = studentFields(req.body);
+  if (!payload.studentNumber || !payload.firstName || !payload.lastName) {
+    return res.status(400).json({ message: 'Student number, first name, and last name are required.' });
+  }
   const student = await Student.create(payload);
-  await audit(req, 'STUDENT_CREATED', 'Student', student._id.toString(), { studentNumber: student.studentNumber });
+  await audit(req, 'STUDENT_CREATED', 'Student', student._id.toString(), {
+    studentNumber: student.studentNumber,
+    course: student.course,
+    yearLevel: student.yearLevel,
+    section: student.section
+  });
   res.status(201).json({ student });
 }));
 
 router.patch('/:id', asyncHandler(async (req, res) => {
-  const allowed = ['studentNumber', 'firstName', 'lastName', 'course', 'yearLevel', 'email', 'active'];
   const update = {};
-  for (const key of allowed) if (req.body[key] !== undefined) update[key] = key === 'active' ? Boolean(req.body[key]) : cleanText(req.body[key], 120);
+  for (const key of ['studentNumber', 'firstName', 'lastName', 'email', 'course', 'yearLevel', 'section']) {
+    if (req.body[key] !== undefined) update[key] = studentFields({ ...req.body, [key]: req.body[key] }, true)[key];
+  }
+  if (req.body.active !== undefined) update.active = Boolean(req.body.active);
   const student = await Student.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true }).select('-faceDescriptor');
   if (!student) return res.status(404).json({ message: 'Student not found' });
   await audit(req, 'STUDENT_UPDATED', 'Student', student._id.toString(), update);
@@ -78,7 +121,10 @@ router.delete('/:id/face', asyncHandler(async (req, res) => {
 }));
 
 router.get('/face-templates', asyncHandler(async (req, res) => {
-  const items = await Student.find({ active: true, $or: [{ faceDescriptors: { $exists: true, $ne: [] } }, { faceDescriptor: { $exists: true } }] }).select('+faceDescriptors +faceDescriptor studentNumber firstName lastName');
+  const items = await Student.find({
+    active: true,
+    $or: [{ faceDescriptors: { $exists: true, $ne: [] } }, { faceDescriptor: { $exists: true } }]
+  }).select('+faceDescriptors +faceDescriptor studentNumber firstName lastName');
   res.json({ items });
 }));
 
