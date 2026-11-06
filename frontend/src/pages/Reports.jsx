@@ -3,6 +3,11 @@ import { FileDown, Printer } from 'lucide-react';
 import { api, downloadCsv } from '../services/api';
 import { PageHead, Field } from '../components/common/UI';
 import institutionalHeader from '../assets/pcc-institutional-header.jpg';
+import {
+  exportAttendanceCsv,
+  exportAttendancePdf,
+  exportAttendanceWord,
+} from '../utils/attendance-report-export';
 import '../attendance-print.css';
 
 const YEARS = [
@@ -152,6 +157,7 @@ export default function Reports() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [printData, setPrintData] = useState(null);
+  const [exporting, setExporting] = useState('');
 
   useEffect(() => {
     api('/events')
@@ -214,6 +220,21 @@ export default function Reports() {
     }
   }
 
+  async function exportFormatted(format) {
+    if (!printData) return;
+    setExporting(format);
+    setError('');
+    try {
+      if (format === 'csv') exportAttendanceCsv(printData);
+      if (format === 'pdf') await exportAttendancePdf(printData, institutionalHeader);
+      if (format === 'word') await exportAttendanceWord(printData, institutionalHeader);
+    } catch (err) {
+      setError(err.message || `Unable to create ${format.toUpperCase()} report.`);
+    } finally {
+      setExporting('');
+    }
+  }
+
   function printSheet() {
     if (!printData) return;
     window.print();
@@ -272,8 +293,21 @@ export default function Reports() {
           </div>
           {printData && (
             <div className="report-print-ready">
-              <span>Print sheet ready: {printData.students.length} students, {splitPages(printData.students).length} page(s).</span>
-              <button className="btn primary" onClick={printSheet}><Printer size={16} /> Print attendance sheet</button>
+              <span>Report ready: {printData.students.length} students. Choose an export format.</span>
+              <div className="report-export-buttons">
+                <button className="btn primary" onClick={() => exportFormatted('csv')} disabled={Boolean(exporting)}>
+                  <FileDown size={16} /> {exporting === 'csv' ? 'Creating CSV…' : 'Download CSV'}
+                </button>
+                <button className="btn primary" onClick={() => exportFormatted('pdf')} disabled={Boolean(exporting)}>
+                  <FileDown size={16} /> {exporting === 'pdf' ? 'Creating PDF…' : 'Download PDF'}
+                </button>
+                <button className="btn primary" onClick={() => exportFormatted('word')} disabled={Boolean(exporting)}>
+                  <FileDown size={16} /> {exporting === 'word' ? 'Creating Word…' : 'Download Word'}
+                </button>
+                <button className="btn ghost" onClick={printSheet}>
+                  <Printer size={16} /> Print attendance sheet
+                </button>
+              </div>
             </div>
           )}
         </div>
