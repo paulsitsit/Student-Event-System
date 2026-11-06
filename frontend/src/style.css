@@ -589,3 +589,20 @@
     display: flex;
   }
 }
+
+/* Shared confirmation and attendance correction modal styles */
+.confirm-modal-content { display: grid; gap: 16px; }
+.confirm-modal-icon {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 13px; background: rgba(229,184,85,.12); color: #e5b855;
+}
+.confirm-modal-message { color: #e4c8af; line-height: 1.65; }
+.btn.danger { background: #a94d42; color: #fff5e9; }
+.btn.danger:hover { background: #bf5b4e; }
+.btn:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
+.correction-context {
+  display: flex; align-items: center; gap: 10px; padding: 12px;
+  border-radius: 10px; background: rgba(216,142,94,.10);
+  color: #e4c8af; font-size: 12px;
+}
+.correction-context svg { flex: 0 0 auto; color: #e9a576; }
