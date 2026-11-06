@@ -1,0 +1,5 @@
+import React, { useEffect, useState } from 'react';
+import { api } from '../services/api';
+import { PageHead, Empty } from '../components/common/UI';
+const fmt = (value) => value ? new Date(value).toLocaleString() : '—';
+export default function Audit(){const [items,setItems]=useState([]),[error,setError]=useState('');useEffect(()=>{api('/audit').then(d=>setItems(d.items)).catch(e=>setError(e.message));},[]);return <><PageHead eyebrow="SECURITY" title="Audit Trail" desc="Review administrator actions recorded by the system."/><section className="panel">{error&&<div className="error">{error}</div>}<div className="table-wrap"><table><thead><tr><th>Action</th><th>Administrator</th><th>Entity</th><th>Timestamp</th><th>IP</th></tr></thead><tbody>{items.map(x=><tr key={x._id}><td><b>{x.action}</b></td><td>{x.actor?.name||'—'}</td><td>{x.entityType} {x.entityId}</td><td>{fmt(x.createdAt)}</td><td>{x.ip}</td></tr>)}</tbody></table></div>{items.length===0&&<Empty text="No audit entries found."/>}</section></>}

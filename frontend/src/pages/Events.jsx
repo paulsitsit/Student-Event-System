@@ -1,0 +1,17 @@
+import React, { useEffect, useState } from 'react';
+import { Plus, CalendarDays } from 'lucide-react';
+import { api } from '../services/api';
+import { PageHead, Modal, Field, Empty } from '../components/common/UI';
+const fmt = (value) => value ? new Date(value).toLocaleString() : '—';
+const todayLocal = () => new Date().toISOString().slice(0,16);
+export default function Events(){
+ const [items,setItems]=useState([]),[modal,setModal]=useState(false),[editing,setEditing]=useState(null),[error,setError]=useState('');
+ const blank={title:'',description:'',venue:'',startsAt:todayLocal(),endsAt:todayLocal()};
+ const [form,setForm]=useState(blank);
+ async function load(){try{setItems((await api('/events')).items);}catch(e){setError(e.message);}}
+ useEffect(()=>{load();},[]);
+ function open(e=null){setEditing(e);setForm(e?{title:e.title,description:e.description,venue:e.venue,startsAt:new Date(e.startsAt).toISOString().slice(0,16),endsAt:new Date(e.endsAt).toISOString().slice(0,16)}:blank);setModal(true);setError('');}
+ async function save(ev){ev.preventDefault();try{await api(editing?`/events/${editing._id}`:'/events',{method:editing?'PATCH':'POST',body:JSON.stringify(form)});setModal(false);load();}catch(e){setError(e.message);}}
+ async function archive(e){if(!confirm(`Archive "${e.title}"?`))return;try{await api(`/events/${e._id}`,{method:'DELETE'});load();}catch(err){setError(err.message);}}
+ return <><PageHead eyebrow="SCHEDULING" title="Events" desc="Create and manage campus events for attendance tracking." action={<button className="btn primary" onClick={()=>open()}><Plus size={17}/> Create event</button>}/>{error&&<div className="error">{error}</div>}<div className="event-grid">{items.map(e=><article className="event-card" key={e._id}><div className="event-top"><span className="pill green">{e.status}</span><span className="muted">{e.venue||'Venue not set'}</span></div><h2>{e.title}</h2><p className="muted">{e.description||'No event description.'}</p><div className="event-date"><CalendarDays size={17}/><span>{fmt(e.startsAt)}<br/><small>Until {fmt(e.endsAt)}</small></span></div><div className="actions"><button className="btn mini ghost" onClick={()=>open(e)}>Edit</button><button className="btn mini ghost" onClick={()=>archive(e)}>Archive</button></div></article>)}</div>{items.length===0&&<section className="panel"><Empty text="No events yet. Create your first event." /></section>}{modal&&<Modal title={editing?'Edit event':'Create event'} onClose={()=>setModal(false)}><form className="form-grid" onSubmit={save}><Field label="Event title"><input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></Field><Field label="Venue"><input value={form.venue} onChange={e=>setForm({...form,venue:e.target.value})}/></Field><Field label="Start date and time"><input type="datetime-local" required value={form.startsAt} onChange={e=>setForm({...form,startsAt:e.target.value})}/></Field><Field label="End date and time"><input type="datetime-local" required value={form.endsAt} onChange={e=>setForm({...form,endsAt:e.target.value})}/></Field><Field label="Description"><textarea rows="3" value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></Field>{error&&<div className="error span-2">{error}</div>}<div className="modal-actions span-2"><button type="button" className="btn ghost" onClick={()=>setModal(false)}>Cancel</button><button className="btn primary">Save event</button></div></form></Modal>}</>;
+}
