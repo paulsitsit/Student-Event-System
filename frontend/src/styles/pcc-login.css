@@ -1,4 +1,8 @@
-/* Passi City College Attendance Portal login */
+
+/* =========================================
+   PASSI CITY COLLEGE - LOGIN PAGE
+========================================= */
+
 .pcc-login-wrap {
   min-height: 100vh;
   width: 100%;
@@ -6,37 +10,60 @@
   place-items: center;
   padding: 28px 18px;
   box-sizing: border-box;
+
   background:
-    radial-gradient(ellipse at 85% 8%, rgba(139, 55, 14, .24), transparent 42%),
-    linear-gradient(135deg, #1d120d 0%, #2d1a12 55%, #1b100b 100%);
+    radial-gradient(
+      ellipse at 85% 8%,
+      rgba(139, 55, 14, .24),
+      transparent 42%
+    ),
+    linear-gradient(
+      135deg,
+      #1d120d 0%,
+      #2d1a12 55%,
+      #1b100b 100%
+    );
 }
 
+/* Main login card */
+
 .pcc-login-card {
-  width: min(100%, 520px);
+  width: min(100%, 650px);
   box-sizing: border-box;
-  padding: 34px 40px 30px;
+  padding: 42px 40px 42px;
+
   border: 1px solid rgba(255, 224, 198, .17);
   border-radius: 27px;
-  background: linear-gradient(160deg, rgba(84, 51, 33, .88), rgba(47, 29, 20, .96));
+
+  background: linear-gradient(
+    160deg,
+    rgba(84, 51, 33, .88),
+    rgba(47, 29, 20, .96)
+  );
+
   box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
   color: #fff3e8;
 }
+
+/* Branding section */
 
 .pcc-login-brand {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 27px;
+  margin-bottom: 45px;
 }
+
+/* Logos */
 
 .pcc-login-logos {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(18px, 5vw, 38px);
-  margin: 0 auto 18px;
+  gap: clamp(20px, 5vw, 38px);
+  margin: 0 auto 25px;
 }
 
 .pcc-login-logo-frame {
@@ -44,7 +71,9 @@
   place-items: center;
   flex: 0 1 auto;
   overflow: hidden;
+
   background: #fff;
+
   box-shadow: 0 8px 24px rgba(0, 0, 0, .20);
 }
 
@@ -70,63 +99,84 @@
   object-position: center;
 }
 
+/* College name */
+
 .pcc-login-eyebrow {
-  margin: 0 0 8px;
+  margin: 0 0 9px;
   color: #e79a68;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
 }
+
+/* Degree program */
+
+.pcc-login-program {
+  max-width: 430px;
+  margin: 0 0 23px;
+
+  color: #fff3e8;
+  font-size: clamp(15px, 3vw, 19px);
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: .5px;
+  text-align: center;
+}
+
+/* Attendance Portal heading */
 
 .pcc-login-brand h1 {
   margin: 0;
   color: #fff5ec;
-  font-size: clamp(25px, 5vw, 31px);
-  line-height: 1.15;
+
+  font-size: clamp(29px, 5vw, 36px);
+  line-height: 1.2;
   font-weight: 800;
 }
 
+/* Administrator sign-in subtitle */
+
 .pcc-login-subtitle {
-  margin: 8px 0 0;
+  margin: 12px 0 0;
   color: #d9bba4;
-  font-size: 14px;
+  font-size: 17px;
 }
 
-.pcc-login-program {
-  max-width: 360px;
-  margin: 15px 0 0;
-  color: #e8cbb5;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.55;
-  text-align: center;
-}
+/* Login form */
 
 .pcc-login-form {
   display: grid;
-  gap: 18px;
+  gap: 23px;
 }
 
 .pcc-login-form label {
   display: grid;
-  gap: 9px;
+  gap: 10px;
+
   color: #e8cbb5;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 }
+
+/* Email and password inputs */
 
 .pcc-login-form input {
   display: block;
   width: 100%;
-  min-height: 52px;
+  min-height: 64px;
   box-sizing: border-box;
-  padding: 0 16px;
+
+  padding: 0 18px;
+
   border: 1px solid rgba(255, 232, 214, .22);
-  border-radius: 12px;
+  border-radius: 15px;
   outline: none;
+
   background: #ead5c3;
   color: #29180f;
+
   font: inherit;
+  font-size: 17px;
 }
 
 .pcc-login-form input:focus {
@@ -134,26 +184,32 @@
   box-shadow: 0 0 0 3px rgba(227, 154, 104, .20);
 }
 
+/* Password visibility control */
+
 .pcc-password-control {
   position: relative;
   display: block;
 }
 
 .pcc-password-control input {
-  padding-right: 54px;
+  padding-right: 58px;
 }
 
 .pcc-password-toggle {
   position: absolute;
   top: 50%;
-  right: 8px;
+  right: 9px;
   transform: translateY(-50%);
+
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+
+  width: 42px;
+  height: 42px;
+
   border: 0;
   border-radius: 9px;
+
   background: transparent;
   color: #68432e;
   cursor: pointer;
@@ -163,18 +219,27 @@
   background: rgba(104, 67, 46, .10);
 }
 
+/* Sign in button */
+
 .pcc-login-submit {
   width: 100%;
-  min-height: 51px;
+  min-height: 65px;
   margin-top: 5px;
+
   border: 0;
-  border-radius: 12px;
+  border-radius: 15px;
+
   background: #d98e5d;
   color: #24150e;
-  font-size: 15px;
+
+  font-size: 18px;
   font-weight: 800;
+
   cursor: pointer;
-  transition: background .18s ease, transform .18s ease;
+
+  transition:
+    background .18s ease,
+    transform .18s ease;
 }
 
 .pcc-login-submit:hover:not(:disabled) {
@@ -187,29 +252,79 @@
   cursor: not-allowed;
 }
 
-.pcc-login-note {
-  margin: 20px 0 0;
-  color: #b9967d;
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: center;
-}
+/* Login error */
 
 .pcc-login-error {
-  margin: 0 0 18px;
-  padding: 11px 13px;
+  margin: 0 0 20px;
+  padding: 12px 14px;
+
   border: 1px solid rgba(233, 129, 117, .35);
   border-radius: 10px;
+
   background: rgba(233, 129, 117, .12);
   color: #ffc0b8;
-  font-size: 13px;
+
+  font-size: 14px;
 }
 
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
 @media (max-width: 520px) {
-  .pcc-login-wrap { padding: 18px 12px; }
-  .pcc-login-card { padding: 27px 21px 23px; border-radius: 21px; }
-  .pcc-login-logo-frame-main { width: 122px; height: 122px; }
-  .pcc-login-logo-frame-soict { width: 98px; height: 98px; }
-  .pcc-login-logos { gap: 16px; }
-  .pcc-login-program { font-size: 11px; }
+  .pcc-login-wrap {
+    padding: 18px 12px;
+  }
+
+  .pcc-login-card {
+    padding: 30px 21px 34px;
+    border-radius: 21px;
+  }
+
+  .pcc-login-logo-frame-main {
+    width: 122px;
+    height: 122px;
+  }
+
+  .pcc-login-logo-frame-soict {
+    width: 98px;
+    height: 98px;
+  }
+
+  .pcc-login-logos {
+    gap: 16px;
+    margin-bottom: 21px;
+  }
+
+  .pcc-login-eyebrow {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .pcc-login-program {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .pcc-login-brand {
+    margin-bottom: 35px;
+  }
+
+  .pcc-login-form {
+    gap: 20px;
+  }
+
+  .pcc-login-form label {
+    font-size: 14px;
+  }
+
+  .pcc-login-form input {
+    min-height: 58px;
+    font-size: 15px;
+  }
+
+  .pcc-login-submit {
+    min-height: 59px;
+    font-size: 16px;
+  }
 }
