@@ -14,6 +14,7 @@ const studentSchema = new Schema({
   studentNumber: { type: String, required: true, unique: true, trim: true },
   firstName: { type: String, required: true, trim: true },
   lastName: { type: String, required: true, trim: true },
+  gender: { type: String, enum: ['Female', 'Male', ''], default: '' },
   course: { type: String, default: 'BSIT', trim: true },
   yearLevel: { type: String, default: '' },
   section: { type: String, default: '', uppercase: true, trim: true },

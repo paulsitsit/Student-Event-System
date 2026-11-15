@@ -13,6 +13,7 @@ const YEAR_OPTIONS = [
   { value: '4', label: '4th Year' },
 ];
 const SECTION_OPTIONS = ['A', 'B', 'C'];
+const GENDER_OPTIONS = ['Female', 'Male'];
 
 function normalizeYear(value) {
   const match = String(value || '').match(/[1-4]/);
@@ -22,6 +23,11 @@ function normalizeYear(value) {
 export default function Students() {
   const [items, setItems] = useState([]);
   const [q, setQ] = useState('');
+  const [sortBy, setSortBy] = useState('name-asc');
+  const [yearFilter, setYearFilter] = useState('');
+  const [sectionFilter, setSectionFilter] = useState('');
+  const [genderFilter, setGenderFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [enrolling, setEnrolling] = useState(null);
@@ -42,6 +48,7 @@ export default function Students() {
     studentNumber: '',
     firstName: '',
     lastName: '',
+    gender: '',
     course: 'BSIT',
     yearLevel: '',
     section: '',
@@ -52,7 +59,7 @@ export default function Students() {
 
   async function load() {
     try {
-      const data = await api(`/students?q=${encodeURIComponent(q)}&limit=100`);
+      const data = await api(`/students?q=${encodeURIComponent(q)}&limit=1000`);
       setItems(data.items || []);
       setError('');
     } catch (err) {
@@ -177,6 +184,7 @@ export default function Students() {
         ? {
             ...empty,
             ...student,
+            gender: student.gender || '',
             course: student.course || 'BSIT',
             yearLevel: normalizeYear(student.yearLevel),
             section: String(student.section || '').toUpperCase(),
@@ -201,6 +209,7 @@ export default function Students() {
         course: 'BSIT',
         yearLevel: form.yearLevel,
         section: form.section,
+        gender: form.gender,
       };
 
       await api(editing ? `/students/${editing._id}` : '/students', {
@@ -240,6 +249,50 @@ export default function Students() {
     YEAR_OPTIONS.find(
       (item) => item.value === normalizeYear(value)
     )?.label || value || '—';
+
+  const filtersActive = Boolean(yearFilter || sectionFilter || genderFilter || statusFilter);
+
+  const fullName = (student) =>
+    `${student.lastName || ''} ${student.firstName || ''}`.trim();
+
+  const byName = (a, b) => fullName(a).localeCompare(fullName(b), undefined, { sensitivity: 'base' });
+  const byNumber = (a, b) =>
+    String(a.studentNumber || '').localeCompare(String(b.studentNumber || ''), undefined, { numeric: true });
+  const byYear = (a, b) =>
+    Number(normalizeYear(a.yearLevel) || 9) - Number(normalizeYear(b.yearLevel) || 9);
+  // Female first, then male, then students with no gender set.
+  const genderRank = (student) =>
+    student.gender === 'Female' ? 0 : student.gender === 'Male' ? 1 : 2;
+
+  const sorters = {
+    'name-asc': byName,
+    'name-desc': (a, b) => byName(b, a),
+    'number-asc': byNumber,
+    'number-desc': (a, b) => byNumber(b, a),
+    'year-asc': (a, b) => byYear(a, b) || byName(a, b),
+    'year-desc': (a, b) => byYear(b, a) || byName(a, b),
+    'section-asc': (a, b) =>
+      String(a.section || 'Z').localeCompare(String(b.section || 'Z')) || byYear(a, b) || byName(a, b),
+    'gender-asc': (a, b) => genderRank(a) - genderRank(b) || byName(a, b),
+    newest: (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
+  };
+
+  const visibleStudents = items
+    .filter((student) => !yearFilter || normalizeYear(student.yearLevel) === yearFilter)
+    .filter((student) => !sectionFilter || String(student.section || '').toUpperCase() === sectionFilter)
+    .filter((student) => !genderFilter || student.gender === genderFilter)
+    .filter((student) =>
+      !statusFilter || (statusFilter === 'active' ? student.active : !student.active)
+    )
+    .sort(sorters[sortBy] || byName);
+
+  function clearFilters() {
+    setYearFilter('');
+    setSectionFilter('');
+    setGenderFilter('');
+    setStatusFilter('');
+    setSortBy('name-asc');
+  }
 
   const fourthYearStudents = eligibleStudents.filter(
     (student) => String(student.yearLevel) === '4'
@@ -308,6 +361,72 @@ export default function Students() {
         </button>
       </div>
 
+      <div className="student-filters">
+        <label>
+          Sort by
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+            <option value="name-asc">Name (A–Z)</option>
+            <option value="name-desc">Name (Z–A)</option>
+            <option value="number-asc">Student number (low to high)</option>
+            <option value="number-desc">Student number (high to low)</option>
+            <option value="year-asc">Year level (1st to 4th)</option>
+            <option value="year-desc">Year level (4th to 1st)</option>
+            <option value="section-asc">Section (A–C)</option>
+            <option value="gender-asc">Gender (female first)</option>
+            <option value="newest">Recently added</option>
+          </select>
+        </label>
+
+        <label>
+          Year level
+          <select value={yearFilter} onChange={(event) => setYearFilter(event.target.value)}>
+            <option value="">All years</option>
+            {YEAR_OPTIONS.map((year) => (
+              <option key={year.value} value={year.value}>{year.label}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Section
+          <select value={sectionFilter} onChange={(event) => setSectionFilter(event.target.value)}>
+            <option value="">All sections</option>
+            {SECTION_OPTIONS.map((section) => (
+              <option key={section} value={section}>Section {section}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Gender
+          <select value={genderFilter} onChange={(event) => setGenderFilter(event.target.value)}>
+            <option value="">All genders</option>
+            {GENDER_OPTIONS.map((gender) => (
+              <option key={gender} value={gender}>{gender}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Status
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </label>
+
+        {(filtersActive || sortBy !== 'name-asc') && (
+          <button type="button" className="btn ghost mini" onClick={clearFilters}>
+            Reset
+          </button>
+        )}
+
+        <span className="student-count">
+          Showing {visibleStudents.length} of {items.length}
+        </span>
+      </div>
+
       {error && (
         <div className="error" role="alert">
           {error}
@@ -320,6 +439,7 @@ export default function Students() {
             <thead>
               <tr>
                 <th>Student</th>
+                <th>Gender</th>
                 <th>Course</th>
                 <th>Year level</th>
                 <th>Section</th>
@@ -330,7 +450,7 @@ export default function Students() {
             </thead>
 
             <tbody>
-              {items.map((student) => (
+              {visibleStudents.map((student) => (
                 <tr key={student._id}>
                   <td>
                     <b>
@@ -339,6 +459,7 @@ export default function Students() {
                     <small>{student.studentNumber}</small>
                   </td>
 
+                  <td>{student.gender || '—'}</td>
                   <td>{student.course || '—'}</td>
                   <td>{yearLabel(student.yearLevel)}</td>
                   <td>{student.section || '—'}</td>
@@ -388,6 +509,10 @@ export default function Students() {
 
         {items.length === 0 && (
           <Empty text="No students found. Add a student to get started." />
+        )}
+
+        {items.length > 0 && visibleStudents.length === 0 && (
+          <Empty text="No students match the selected filters." />
         )}
       </section>
 
@@ -707,7 +832,7 @@ export default function Students() {
           onClose={() => !busy && setModal(false)}
         >
           <form className="form-grid" onSubmit={save}>
-            <Field label="Student number">
+            <Field label="Student Number">
               <input
                 value={form.studentNumber}
                 onChange={(event) =>
@@ -720,7 +845,20 @@ export default function Students() {
               />
             </Field>
 
-            <Field label="First name">
+            <Field label="Email">
+              <input
+                type="email"
+                value={form.email || ''}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    email: event.target.value,
+                  })
+                }
+              />
+            </Field>
+
+            <Field label="First Name">
               <input
                 value={form.firstName}
                 onChange={(event) =>
@@ -733,7 +871,7 @@ export default function Students() {
               />
             </Field>
 
-            <Field label="Last name">
+            <Field label="Last Name">
               <input
                 value={form.lastName}
                 onChange={(event) =>
@@ -744,6 +882,27 @@ export default function Students() {
                 }
                 required
               />
+            </Field>
+
+            <Field label="Gender">
+              <select
+                value={form.gender || ''}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    gender: event.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">Select gender</option>
+
+                {GENDER_OPTIONS.map((gender) => (
+                  <option key={gender} value={gender}>
+                    {gender}
+                  </option>
+                ))}
+              </select>
             </Field>
 
             <Field label="Course">
@@ -765,7 +924,7 @@ export default function Students() {
               </select>
             </Field>
 
-            <Field label="Year level">
+            <Field label="Year Level">
               <select
                 value={form.yearLevel}
                 onChange={(event) =>
@@ -805,19 +964,6 @@ export default function Students() {
                   </option>
                 ))}
               </select>
-            </Field>
-
-            <Field label="Email">
-              <input
-                type="email"
-                value={form.email || ''}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    email: event.target.value,
-                  })
-                }
-              />
             </Field>
 
             {error && (
