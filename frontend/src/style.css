@@ -751,3 +751,6 @@
   .student-filters select { width: 100%; min-width: 0; }
   .student-count { margin-left: 0; flex-basis: 100%; }
 }
+.student-filters input[type="search"], .student-filters input[type="date"] { min-width: 150px; padding: 9px 10px; border-radius: 9px; border: 1px solid #ffffff20; background: #e9d5c4; color: #38251a; font-size: 12px; outline: 0; }
+.student-filters input:focus { border-color: #dc9567; box-shadow: 0 0 0 3px #dc95672b; }
+@media (max-width: 720px) { .student-filters input[type="search"], .student-filters input[type="date"] { width: 100%; min-width: 0; } }

@@ -24,6 +24,11 @@ export default function Attendance() {
   const [form, setForm] = useState({ studentId: '', eventId: '', action: 'timeIn' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
 
   async function load() {
     try {
@@ -105,6 +110,54 @@ export default function Attendance() {
     }
   }
 
+  const studentName = (record) =>
+    `${record.student?.lastName || ''}, ${record.student?.firstName || ''}`;
+  const time = (value) => (value ? new Date(value).getTime() : 0);
+  const sameDay = (value, day) => {
+    if (!value) return false;
+    const date = new Date(value);
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 10);
+    return local === day;
+  };
+  const byText = (a, b) => String(a).localeCompare(String(b), undefined, { sensitivity: 'base' });
+
+  const sorters = {
+    newest: (a, b) => time(b.timeIn) - time(a.timeIn),
+    oldest: (a, b) => time(a.timeIn) - time(b.timeIn),
+    'name-asc': (a, b) => byText(studentName(a), studentName(b)),
+    'name-desc': (a, b) => byText(studentName(b), studentName(a)),
+    'number-asc': (a, b) =>
+      String(a.student?.studentNumber || '').localeCompare(
+        String(b.student?.studentNumber || ''), undefined, { numeric: true }),
+    'event-asc': (a, b) => byText(a.event?.title || '', b.event?.title || '') || time(b.timeIn) - time(a.timeIn),
+  };
+
+  const sourceOptions = [...new Set(items.map((record) => record.source).filter(Boolean))].sort();
+  const needle = search.trim().toLowerCase();
+
+  const visibleItems = items
+    .filter((record) => {
+      if (!needle) return true;
+      const haystack = `${record.student?.firstName || ''} ${record.student?.lastName || ''} ${record.student?.studentNumber || ''}`.toLowerCase();
+      return haystack.includes(needle);
+    })
+    .filter((record) => !statusFilter || (statusFilter === 'out' ? Boolean(record.timeOut) : !record.timeOut))
+    .filter((record) => !sourceFilter || record.source === sourceFilter)
+    .filter((record) => !dateFilter || sameDay(record.timeIn, dateFilter))
+    .sort(sorters[sortBy] || sorters.newest);
+
+  const filtersActive = Boolean(needle || statusFilter || sourceFilter || dateFilter || sortBy !== 'newest');
+
+  function clearFilters() {
+    setSearch('');
+    setStatusFilter('');
+    setSourceFilter('');
+    setDateFilter('');
+    setSortBy('newest');
+  }
+
   return (
     <>
       <PageHead
@@ -132,6 +185,64 @@ export default function Attendance() {
         </button>
       </div>
 
+      <div className="student-filters">
+        <label>
+          Search student
+          <input
+            type="search"
+            placeholder="Name or student number"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </label>
+
+        <label>
+          Sort by
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="name-asc">Student name (A–Z)</option>
+            <option value="name-desc">Student name (Z–A)</option>
+            <option value="number-asc">Student number</option>
+            <option value="event-asc">Event (A–Z)</option>
+          </select>
+        </label>
+
+        <label>
+          Status
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+            <option value="">All records</option>
+            <option value="in">Still timed in</option>
+            <option value="out">Timed out</option>
+          </select>
+        </label>
+
+        <label>
+          Source
+          <select value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
+            <option value="">All sources</option>
+            {sourceOptions.map((source) => (
+              <option key={source} value={source}>{source}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Date
+          <input type="date" value={dateFilter} onChange={(event) => setDateFilter(event.target.value)} />
+        </label>
+
+        {filtersActive && (
+          <button type="button" className="btn ghost mini" onClick={clearFilters}>
+            Reset
+          </button>
+        )}
+
+        <span className="student-count">
+          Showing {visibleItems.length} of {items.length}
+        </span>
+      </div>
+
       {error && <div className="error" role="alert">{error}</div>}
 
       <section className="panel">
@@ -144,7 +255,7 @@ export default function Attendance() {
               </tr>
             </thead>
             <tbody>
-              {items.map((record) => (
+              {visibleItems.map((record) => (
                 <tr key={record._id}>
                   <td>
                     <b>{record.student?.lastName}, {record.student?.firstName}</b>
@@ -165,6 +276,9 @@ export default function Attendance() {
           </table>
         </div>
         {items.length === 0 && <Empty text="No attendance records for this filter." />}
+        {items.length > 0 && visibleItems.length === 0 && (
+          <Empty text="No attendance records match the selected filters." />
+        )}
       </section>
 
       {modal && (
