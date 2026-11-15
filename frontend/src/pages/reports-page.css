@@ -75,3 +75,62 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Primary action sits at the bottom right, lined up with the filter grid */
+.report-panel-fixed-course .report-actions {
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 680px;
+  margin-top: 14px;
+}
+
+.report-panel-fixed-course .report-actions .btn,
+.report-panel-fixed-course .report-export-buttons .btn {
+  margin-top: 0;
+}
+
+.report-panel-fixed-course .report-print-ready {
+  max-width: 680px;
+}
+
+.report-panel-fixed-course .report-export-buttons {
+  justify-content: flex-end;
+}
+
+/* Tablets and small laptops: panel fills the available width */
+@media (max-width: 900px) {
+  .report-panel-fixed-course {
+    width: 100%;
+    max-width: none;
+  }
+  .report-panel-fixed-course .report-filters,
+  .report-panel-fixed-course .report-actions,
+  .report-panel-fixed-course .report-print-ready {
+    max-width: none;
+  }
+}
+
+/* Phones: stack everything and make buttons full width for easy tapping */
+@media (max-width: 600px) {
+  .report-panel-fixed-course {
+    padding: 16px;
+    gap: 14px;
+  }
+  .report-course-static {
+    width: 100%;
+  }
+  .report-panel-fixed-course .report-actions .btn,
+  .report-panel-fixed-course .report-export-buttons .btn {
+    width: 100%;
+  }
+  .report-panel-fixed-course .report-export-buttons {
+    flex-direction: column;
+  }
+  .attendance-print-preview {
+    padding: 12px;
+  }
+  .attendance-print-preview-head {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
