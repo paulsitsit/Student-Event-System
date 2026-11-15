@@ -42,6 +42,10 @@ const studentName = (student = {}) =>
   student.name ||
   '';
 
+// Female first, then male, then students with no gender set.
+const genderRank = (student) =>
+  student.gender === 'Female' ? 0 : student.gender === 'Male' ? 1 : 2;
+
 function splitPages(items) {
   const pages = [];
   for (let index = 0; index < items.length; index += PAGE_SIZE) {
@@ -156,7 +160,8 @@ function PrintSheet({ event, students, attendance, filters }) {
 
 export default function Reports() {
   const [events, setEvents] = useState([]);
-  const [filters, setFilters] = useState({ eventId: '', yearLevel: '', section: '' });
+  const [filters, setFilters] = useState({ eventId: '', yearLevel: '', section: '', gender: '' });
+  const [groupByGender, setGroupByGender] = useState(true);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [printData, setPrintData] = useState(null);
@@ -202,11 +207,22 @@ export default function Reports() {
         allStudents = allStudents.concat(data.items || []);
       }
 
+      // Females are listed first and males below when "group by gender" is on.
+      // Students with no gender set are listed last. The same order is used by
+      // the print preview and the CSV, PDF and Word exports.
       allStudents = allStudents
         .filter((student) => student.active !== false && student.course === COURSE)
         .filter((student) => !filters.yearLevel || String(student.yearLevel) === filters.yearLevel)
         .filter((student) => !filters.section || student.section === filters.section)
-        .sort((a, b) => `${a.lastName || ''} ${a.firstName || ''}`.localeCompare(`${b.lastName || ''} ${b.firstName || ''}`));
+        .filter((student) => !filters.gender || student.gender === filters.gender)
+        .sort((a, b) =>
+          (groupByGender ? genderRank(a) - genderRank(b) : 0) ||
+          `${a.lastName || ''} ${a.firstName || ''}`.localeCompare(
+            `${b.lastName || ''} ${b.firstName || ''}`,
+            undefined,
+            { sensitivity: 'base' }
+          )
+        );
 
       const attendanceData = await api(`/attendance?eventId=${encodeURIComponent(filters.eventId)}`);
 
@@ -215,6 +231,7 @@ export default function Reports() {
         students: allStudents,
         attendance: attendanceData.items || [],
         filters: { ...filters, course: COURSE },
+        missingGender: allStudents.filter((student) => !student.gender).length,
       });
     } catch (err) {
       setError(err.message || 'Unable to prepare printable attendance sheet.');
@@ -257,7 +274,7 @@ export default function Reports() {
           <p className="muted">
             Print a landscape attendance sheet for BSIT students with event details,
             student roster, and grouped AM/PM Time-In and Time-Out columns.
-            Select an event and optionally filter by year level and section.
+            Select an event and optionally filter by year level, section, and gender.
           </p>
 
           <div className="report-course-static" aria-label="Course filter fixed to BSIT">
@@ -298,7 +315,27 @@ export default function Reports() {
                 {SECTIONS.map((section) => <option key={section} value={section}>{section}</option>)}
               </select>
             </Field>
+
+            <Field label="Gender">
+              <select
+                value={filters.gender}
+                onChange={(event) => setFilters((current) => ({ ...current, gender: event.target.value }))}
+              >
+                <option value="">All genders</option>
+                <option value="Female">Female only</option>
+                <option value="Male">Male only</option>
+              </select>
+            </Field>
           </div>
+
+          <label className="report-group-gender">
+            <input
+              type="checkbox"
+              checked={groupByGender}
+              onChange={(event) => setGroupByGender(event.target.checked)}
+            />
+            {' '}List females first, then males
+          </label>
 
           {error && <div className="error" role="alert">{error}</div>}
 
@@ -310,7 +347,11 @@ export default function Reports() {
 
           {printData && (
             <div className="report-print-ready">
-              <span>Report ready: {printData.students.length} BSIT students. Choose an export format.</span>
+              <span>
+                Report ready: {printData.students.length} BSIT students. Choose an export format.
+                {printData.missingGender > 0 &&
+                  ` ${printData.missingGender} student(s) have no gender set and are listed last.`}
+              </span>
               <div className="report-export-buttons">
                 <button className="btn primary" onClick={() => exportFormatted('csv')} disabled={Boolean(exporting)}>
                   <FileDown size={16} /> {exporting === 'csv' ? 'Creating CSV…' : 'Download CSV'}

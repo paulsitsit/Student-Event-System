@@ -10,7 +10,7 @@ router.get('/', asyncHandler(async (req, res) => {
   if (req.query.eventId) filter.event = req.query.eventId;
   if (req.query.studentId) filter.student = req.query.studentId;
   const items = await Attendance.find(filter)
-    .populate('student', 'studentNumber firstName lastName course')
+    .populate('student', 'studentNumber firstName lastName course yearLevel section gender')
     .populate('event', 'title startsAt')
     .sort({ timeIn: -1 }).limit(500);
   res.json({ items });

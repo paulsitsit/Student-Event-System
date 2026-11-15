@@ -13,6 +13,7 @@ const YEAR_OPTIONS = [
   { value: '4', label: '4th Year' },
 ];
 const SECTION_OPTIONS = ['A', 'B', 'C'];
+const GENDER_OPTIONS = ['Female', 'Male'];
 
 function normalizeYear(value) {
   const match = String(value || '').match(/[1-4]/);
@@ -25,6 +26,7 @@ export default function Students() {
   const [sortBy, setSortBy] = useState('name-asc');
   const [yearFilter, setYearFilter] = useState('');
   const [sectionFilter, setSectionFilter] = useState('');
+  const [genderFilter, setGenderFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -46,6 +48,7 @@ export default function Students() {
     studentNumber: '',
     firstName: '',
     lastName: '',
+    gender: '',
     course: 'BSIT',
     yearLevel: '',
     section: '',
@@ -181,6 +184,7 @@ export default function Students() {
         ? {
             ...empty,
             ...student,
+            gender: student.gender || '',
             course: student.course || 'BSIT',
             yearLevel: normalizeYear(student.yearLevel),
             section: String(student.section || '').toUpperCase(),
@@ -205,6 +209,7 @@ export default function Students() {
         course: 'BSIT',
         yearLevel: form.yearLevel,
         section: form.section,
+        gender: form.gender,
       };
 
       await api(editing ? `/students/${editing._id}` : '/students', {
@@ -245,7 +250,7 @@ export default function Students() {
       (item) => item.value === normalizeYear(value)
     )?.label || value || '—';
 
-  const filtersActive = Boolean(yearFilter || sectionFilter || statusFilter);
+  const filtersActive = Boolean(yearFilter || sectionFilter || genderFilter || statusFilter);
 
   const fullName = (student) =>
     `${student.lastName || ''} ${student.firstName || ''}`.trim();
@@ -255,6 +260,9 @@ export default function Students() {
     String(a.studentNumber || '').localeCompare(String(b.studentNumber || ''), undefined, { numeric: true });
   const byYear = (a, b) =>
     Number(normalizeYear(a.yearLevel) || 9) - Number(normalizeYear(b.yearLevel) || 9);
+  // Female first, then male, then students with no gender set.
+  const genderRank = (student) =>
+    student.gender === 'Female' ? 0 : student.gender === 'Male' ? 1 : 2;
 
   const sorters = {
     'name-asc': byName,
@@ -265,12 +273,14 @@ export default function Students() {
     'year-desc': (a, b) => byYear(b, a) || byName(a, b),
     'section-asc': (a, b) =>
       String(a.section || 'Z').localeCompare(String(b.section || 'Z')) || byYear(a, b) || byName(a, b),
+    'gender-asc': (a, b) => genderRank(a) - genderRank(b) || byName(a, b),
     newest: (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
   };
 
   const visibleStudents = items
     .filter((student) => !yearFilter || normalizeYear(student.yearLevel) === yearFilter)
     .filter((student) => !sectionFilter || String(student.section || '').toUpperCase() === sectionFilter)
+    .filter((student) => !genderFilter || student.gender === genderFilter)
     .filter((student) =>
       !statusFilter || (statusFilter === 'active' ? student.active : !student.active)
     )
@@ -279,6 +289,7 @@ export default function Students() {
   function clearFilters() {
     setYearFilter('');
     setSectionFilter('');
+    setGenderFilter('');
     setStatusFilter('');
     setSortBy('name-asc');
   }
@@ -361,6 +372,7 @@ export default function Students() {
             <option value="year-asc">Year level (1st to 4th)</option>
             <option value="year-desc">Year level (4th to 1st)</option>
             <option value="section-asc">Section (A–C)</option>
+            <option value="gender-asc">Gender (female first)</option>
             <option value="newest">Recently added</option>
           </select>
         </label>
@@ -381,6 +393,16 @@ export default function Students() {
             <option value="">All sections</option>
             {SECTION_OPTIONS.map((section) => (
               <option key={section} value={section}>Section {section}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Gender
+          <select value={genderFilter} onChange={(event) => setGenderFilter(event.target.value)}>
+            <option value="">All genders</option>
+            {GENDER_OPTIONS.map((gender) => (
+              <option key={gender} value={gender}>{gender}</option>
             ))}
           </select>
         </label>
@@ -417,6 +439,7 @@ export default function Students() {
             <thead>
               <tr>
                 <th>Student</th>
+                <th>Gender</th>
                 <th>Course</th>
                 <th>Year level</th>
                 <th>Section</th>
@@ -436,6 +459,7 @@ export default function Students() {
                     <small>{student.studentNumber}</small>
                   </td>
 
+                  <td>{student.gender || '—'}</td>
                   <td>{student.course || '—'}</td>
                   <td>{yearLabel(student.yearLevel)}</td>
                   <td>{student.section || '—'}</td>
@@ -858,6 +882,27 @@ export default function Students() {
                 }
                 required
               />
+            </Field>
+
+            <Field label="Gender">
+              <select
+                value={form.gender || ''}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    gender: event.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">Select gender</option>
+
+                {GENDER_OPTIONS.map((gender) => (
+                  <option key={gender} value={gender}>
+                    {gender}
+                  </option>
+                ))}
+              </select>
             </Field>
 
             <Field label="Course">

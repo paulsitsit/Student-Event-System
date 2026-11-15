@@ -41,6 +41,17 @@ function studentFields(body, partial = false) {
       throw error;
     }
   }
+  if (!partial || body.gender !== undefined) {
+    const raw = cleanText(body.gender, 10).toLowerCase();
+    payload.gender = raw === 'female' ? 'Female' : raw === 'male' ? 'Male' : '';
+    // Required when adding a student. When editing, an empty value is allowed
+    // (older records have no gender yet), but a non-empty invalid value is rejected.
+    if (!payload.gender && (!partial || raw)) {
+      const error = new Error('Please select a gender (Female or Male).');
+      error.status = 400;
+      throw error;
+    }
+  }
   if (payload.email !== undefined) payload.email = payload.email.toLowerCase();
   return payload;
 }
@@ -180,6 +191,7 @@ router.post('/', asyncHandler(async (req, res) => {
   const student = await Student.create(payload);
   await audit(req, 'STUDENT_CREATED', 'Student', student._id.toString(), {
     studentNumber: student.studentNumber,
+    gender: student.gender,
     course: student.course,
     yearLevel: student.yearLevel,
     section: student.section
@@ -189,7 +201,7 @@ router.post('/', asyncHandler(async (req, res) => {
 
 router.patch('/:id', asyncHandler(async (req, res) => {
   const update = {};
-  for (const key of ['studentNumber', 'firstName', 'lastName', 'email', 'course', 'yearLevel', 'section']) {
+  for (const key of ['studentNumber', 'firstName', 'lastName', 'email', 'course', 'yearLevel', 'section', 'gender']) {
     if (req.body[key] !== undefined) update[key] = studentFields({ ...req.body, [key]: req.body[key] }, true)[key];
   }
   if (req.body.active !== undefined) {
