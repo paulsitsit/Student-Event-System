@@ -722,3 +722,19 @@
   .archive-tabs button { flex: 1; justify-content: center; padding: 9px 6px; }
   .archive-search { max-width: none; width: 100%; }
 }
+
+
+/* Start New School Year workflow */
+.school-year-group { border: 1px solid var(--line, #e5e7eb); border-radius: 12px; padding: 12px; margin: 10px 0; }
+.school-year-group > b { display: block; margin-bottom: 8px; }
+.school-year-group > b small { color: var(--muted, #6b7280); font-weight: 500; }
+.school-year-student { display: flex; align-items: center; gap: 10px; padding: 9px 2px; border-top: 1px solid var(--line, #e5e7eb); cursor: pointer; }
+.school-year-student > input { width: 17px; height: 17px; flex: 0 0 auto; accent-color: var(--green, #16a34a); }
+.school-year-student > span:nth-child(2) { flex: 1; min-width: 0; font-weight: 600; }
+.school-year-student small { display: block; color: var(--muted, #6b7280); font-weight: 400; margin-top: 2px; }
+.school-year-summary { padding-top: 8px; }
+.school-year-summary .archive-summary { margin-top: 8px; }
+@media (max-width: 640px) {
+  .school-year-student { align-items: flex-start; flex-wrap: wrap; }
+  .school-year-student .pill { margin-left: 27px; }
+}

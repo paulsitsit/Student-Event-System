@@ -19,6 +19,11 @@ const studentSchema = new Schema({
   section: { type: String, default: '', uppercase: true, trim: true },
   email: { type: String, default: '', trim: true, lowercase: true },
   active: { type: Boolean, default: true },
+  archiveType: { type: String, enum: ['graduation', ''], default: '' },
+  archivedAt: Date,
+  archivedBy: { type: Schema.Types.ObjectId, ref: 'Admin' },
+  graduationAcademicYear: { type: String, default: '' },
+  promotionHistory: { type: [Schema.Types.Mixed], default: [] },
   faceDescriptor: { type: [Number], default: undefined, select: false },
   faceDescriptors: { type: [[Number]], default: undefined, select: false },
   faceEnrolledAt: Date,
@@ -52,6 +57,17 @@ const attendanceSchema = new Schema({
 }, { timestamps: true });
 attendanceSchema.index({ student: 1, event: 1 }, { unique: true });
 
+const schoolYearOperationSchema = new Schema({
+  academicYear: { type: String, required: true, unique: true, trim: true },
+  status: { type: String, enum: ['completed', 'failed'], default: 'completed' },
+  initiatedBy: { type: Schema.Types.ObjectId, ref: 'Admin', required: true },
+  completedAt: { type: Date, default: Date.now },
+  summary: { type: Schema.Types.Mixed, default: {} },
+  promotedStudentIds: { type: [String], default: [] },
+  graduatedStudentIds: { type: [String], default: [] },
+  retainedStudentIds: { type: [String], default: [] }
+}, { timestamps: true });
+
 const auditSchema = new Schema({
   actor: { type: Schema.Types.ObjectId, ref: 'Admin' },
   action: { type: String, required: true },
@@ -66,3 +82,4 @@ export const Student = model('Student', studentSchema);
 export const Event = model('Event', eventSchema);
 export const Attendance = model('Attendance', attendanceSchema);
 export const AuditLog = model('AuditLog', auditSchema);
+export const SchoolYearOperation = model('SchoolYearOperation', schoolYearOperationSchema);

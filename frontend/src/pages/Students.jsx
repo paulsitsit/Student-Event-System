@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Search, RefreshCw } from 'lucide-react';
+import { Plus, Search, RefreshCw, CalendarDays, GraduationCap, ArrowUpRight } from 'lucide-react';
 import { api } from '../services/api';
 import { PageHead, Modal, Field, Empty } from '../components/common/UI';
 import FaceEnrollment from '../components/students/FaceEnrollment';
@@ -27,6 +27,15 @@ export default function Students() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [busy, setBusy] = useState(false);
+  const [schoolYearOpen, setSchoolYearOpen] = useState(false);
+  const [schoolYearBusy, setSchoolYearBusy] = useState(false);
+  const [schoolYearError, setSchoolYearError] = useState('');
+  const [schoolYearSuccess, setSchoolYearSuccess] = useState('');
+  const [schoolYear, setSchoolYear] = useState('2026-2027');
+  const [currentAcademicYear, setCurrentAcademicYear] = useState('');
+  const [eligibleStudents, setEligibleStudents] = useState([]);
+  const [selectedPromotions, setSelectedPromotions] = useState([]);
+  const [selectedGraduates, setSelectedGraduates] = useState([]);
 
   const empty = {
     studentNumber: '',
@@ -50,6 +59,58 @@ export default function Students() {
   }
 
   useEffect(() => { load(); }, []);
+
+  async function openSchoolYear() {
+    setSchoolYearOpen(true);
+    setSchoolYearError('');
+    setSchoolYearSuccess('');
+    setSelectedPromotions([]);
+    setSelectedGraduates([]);
+    setSchoolYearBusy(true);
+    try {
+      const data = await api('/students/school-year/eligible');
+      setEligibleStudents(data.items || []);
+      const current = data.currentAcademicYear || '';
+      setCurrentAcademicYear(current);
+      if (current) {
+        const match = current.match(/(\d{4})\s*[-–]\s*(\d{4})/);
+        setSchoolYear(match ? `${Number(match[2])}-${Number(match[2]) + 1}` : '2026-2027');
+      } else {
+        const year = new Date().getFullYear();
+        setSchoolYear(`${year}-${year + 1}`);
+      }
+    } catch (err) {
+      setSchoolYearError(err.message || 'Unable to load eligible students.');
+    } finally {
+      setSchoolYearBusy(false);
+    }
+  }
+
+  const toggleSelected = (id, type) => {
+    const setter = type === 'graduate' ? setSelectedGraduates : setSelectedPromotions;
+    setter((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  };
+
+  async function startSchoolYear() {
+    setSchoolYearBusy(true);
+    setSchoolYearError('');
+    setSchoolYearSuccess('');
+    try {
+      const result = await api('/students/school-year/process', {
+        method: 'POST',
+        body: JSON.stringify({ academicYear: schoolYear, promotedStudentIds: selectedPromotions, graduatedStudentIds: selectedGraduates }),
+      });
+      setSchoolYearSuccess(result.message || 'New school year started successfully.');
+      setSchoolYearOpen(false);
+      setSelectedPromotions([]);
+      setSelectedGraduates([]);
+      await load();
+    } catch (err) {
+      setSchoolYearError(err.message || 'Unable to start the new school year.');
+    } finally {
+      setSchoolYearBusy(false);
+    }
+  }
 
   function openForm(student = null) {
     setEditing(student);
@@ -111,10 +172,11 @@ export default function Students() {
         eyebrow="DIRECTORY"
         title="Students"
         desc="Manage student profiles, course assignments, sections, and biometric enrollment."
-        action={<button className="btn primary" onClick={() => openForm()}><Plus size={17} /> Add student</button>}
+        action={<div className="actions"><button className="btn ghost" onClick={openSchoolYear}><CalendarDays size={16} /> Start New School Year</button><button className="btn primary" onClick={() => openForm()}><Plus size={17} /> Add student</button></div>}
       />
 
       {success && <div className="success-message" role="status">{success}</div>}
+      {schoolYearSuccess && <div className="success-message" role="status">{schoolYearSuccess}</div>}
       <div className="toolbar">
         <div className="search">
           <Search size={17} />
@@ -163,6 +225,61 @@ export default function Students() {
         </div>
         {items.length === 0 && <Empty text="No students found. Add a student to get started." />}
       </section>
+
+      {schoolYearOpen && (
+        <Modal title="Start New School Year" onClose={() => !schoolYearBusy && setSchoolYearOpen(false)}>
+          <div className="form-grid">
+            <div className="span-2">
+              <p className="muted">Review the active roster, select students who passed and should move up, then select actual 4th-year graduates. Students you leave unselected will remain at their current year level.</p>
+              {currentAcademicYear && <p className="muted"><b>Current academic year:</b> {currentAcademicYear}. The new year will become the system's current academic year after confirmation.</p>}
+            </div>
+            <Field label="New academic year">
+              <input value={schoolYear} onChange={(event) => setSchoolYear(event.target.value)} placeholder="2026-2027" pattern="[0-9]{4}\\s*[-–]\\s*[0-9]{4}" required />
+            </Field>
+            <div className="span-2">
+              <h3><ArrowUpRight size={16} /> Promote students</h3>
+              <p className="muted">1st → 2nd year · 2nd → 3rd year · 3rd → 4th year</p>
+              {['1', '2', '3'].map((year) => {
+                const group = eligibleStudents.filter((student) => String(student.yearLevel) === year);
+                return <div className="school-year-group" key={year}>
+                  <b>{year}. {year === '1' ? '1st' : year === '2' ? '2nd' : '3rd'} Year <small>({group.length})</small></b>
+                  {group.length ? group.map((student) => <label className="school-year-student" key={student._id}>
+                    <input type="checkbox" checked={selectedPromotions.includes(student._id)} onChange={() => toggleSelected(student._id, 'promote')} />
+                    <span>{student.lastName}, {student.firstName}<small>{student.studentNumber} · {student.course} · Section {student.section || '—'}</small></span>
+                    <span className="pill green">→ Year {Number(year) + 1}</span>
+                  </label>) : <p className="muted">No active students in this year level.</p>}
+                </div>;
+              })}
+            </div>
+            <div className="span-2">
+              <h3><GraduationCap size={17} /> Archive graduates</h3>
+              <p className="muted">Select only students who have actually graduated. They will be marked inactive and moved to Archive; attendance history will be preserved.</p>
+              <div className="school-year-group">
+                <b>4th Year <small>({eligibleStudents.filter((student) => String(student.yearLevel) === '4').length})</small></b>
+                {eligibleStudents.filter((student) => String(student.yearLevel) === '4').map((student) => <label className="school-year-student" key={student._id}>
+                  <input type="checkbox" checked={selectedGraduates.includes(student._id)} onChange={() => toggleSelected(student._id, 'graduate')} />
+                  <span>{student.lastName}, {student.firstName}<small>{student.studentNumber} · {student.course} · Section {student.section || '—'}</small></span>
+                  <span className="pill gray">Graduate</span>
+                </label>)}
+                {!eligibleStudents.some((student) => String(student.yearLevel) === '4') && <p className="muted">No active 4th-year students.</p>}
+              </div>
+            </div>
+            <div className="span-2 school-year-summary">
+              <b>Review summary</b>
+              <div className="archive-summary">
+                <article className="panel archive-stat"><div><strong>{selectedPromotions.length}</strong><span>To promote</span></div></article>
+                <article className="panel archive-stat"><div><strong>{selectedGraduates.length}</strong><span>To archive as graduates</span></div></article>
+                <article className="panel archive-stat"><div><strong>{Math.max(0, eligibleStudents.length - selectedPromotions.length - selectedGraduates.length)}</strong><span>Remain unchanged</span></div></article>
+              </div>
+            </div>
+            {schoolYearError && <div className="error span-2" role="alert">{schoolYearError}</div>}
+            <div className="modal-actions span-2">
+              <button type="button" className="btn ghost" onClick={() => setSchoolYearOpen(false)} disabled={schoolYearBusy}>Cancel</button>
+              <button type="button" className="btn primary" onClick={startSchoolYear} disabled={schoolYearBusy || (!selectedPromotions.length && !selectedGraduates.length)}>{schoolYearBusy ? 'Processing…' : 'Confirm & Start School Year'}</button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {enrolling && (
         <Modal title="Face enrollment" onClose={() => setEnrolling(null)}>

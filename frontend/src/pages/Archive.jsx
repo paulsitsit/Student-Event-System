@@ -27,7 +27,7 @@ export default function Archive() {
     setError('');
     try {
       const [studentData, eventData] = await Promise.all([
-        api('/students?limit=100'),
+        api('/students?active=false&limit=5000'),
         api('/events?includeArchived=true'),
       ]);
       setStudents((studentData.items || []).filter((student) => student.active === false));
@@ -137,7 +137,7 @@ export default function Archive() {
         ) : tab === 'students' ? (
           <div className="table-wrap">
             <table>
-              <thead><tr><th>Student</th><th>Course</th><th>Year level</th><th>Section</th><th>Email</th><th>Action</th></tr></thead>
+              <thead><tr><th>Student</th><th>Course</th><th>Year level</th><th>Section</th><th>Archive reason</th><th>Email</th><th>Action</th></tr></thead>
               <tbody>
                 {filteredStudents.map((student) => (
                   <tr key={student._id}>
@@ -145,6 +145,7 @@ export default function Archive() {
                     <td>{student.course || '—'}</td>
                     <td>{yearLabel(student.yearLevel)}</td>
                     <td>{student.section || '—'}</td>
+                    <td>{student.archiveType === 'graduation' ? `Graduated · ${student.graduationAcademicYear || '—'}` : 'Manually deactivated'}</td>
                     <td>{student.email || '—'}</td>
                     <td><button className="btn mini primary" onClick={() => setTarget({ type: 'student', record: student })}><RotateCcw size={14} /> Restore</button></td>
                   </tr>
