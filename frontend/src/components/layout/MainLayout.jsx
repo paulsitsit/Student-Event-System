@@ -68,8 +68,8 @@ export default function MainLayout({ admin, onLogout, children }) {
             {open ? <X size={21} /> : <Menu size={21} />}
           </button>
           <div className="topbar-brand">
-            <span className="eyebrow">PASSI CITY COLLEGE</span>
-            <b>BS Information Technology</b>
+            <span className="eyebrow">BS INFORMATION TECHNOLOGY</span>
+            <b>Student Event Attendance</b>
           </div>
           <div className="top-right"><ShieldCheck size={17} /><span>Secure admin workspace</span></div>
         </header>
