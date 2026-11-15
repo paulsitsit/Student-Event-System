@@ -707,7 +707,7 @@ export default function Students() {
           onClose={() => !busy && setModal(false)}
         >
           <form className="form-grid" onSubmit={save}>
-            <Field label="Student number">
+            <Field label="Student Number">
               <input
                 value={form.studentNumber}
                 onChange={(event) =>
@@ -720,7 +720,20 @@ export default function Students() {
               />
             </Field>
 
-            <Field label="First name">
+            <Field label="Email">
+              <input
+                type="email"
+                value={form.email || ''}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    email: event.target.value,
+                  })
+                }
+              />
+            </Field>
+
+            <Field label="First Name">
               <input
                 value={form.firstName}
                 onChange={(event) =>
@@ -733,7 +746,7 @@ export default function Students() {
               />
             </Field>
 
-            <Field label="Last name">
+            <Field label="Last Name">
               <input
                 value={form.lastName}
                 onChange={(event) =>
@@ -765,7 +778,7 @@ export default function Students() {
               </select>
             </Field>
 
-            <Field label="Year level">
+            <Field label="Year Level">
               <select
                 value={form.yearLevel}
                 onChange={(event) =>
@@ -805,19 +818,6 @@ export default function Students() {
                   </option>
                 ))}
               </select>
-            </Field>
-
-            <Field label="Email">
-              <input
-                type="email"
-                value={form.email || ''}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    email: event.target.value,
-                  })
-                }
-              />
             </Field>
 
             {error && (
