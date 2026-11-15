@@ -738,3 +738,19 @@
   .school-year-student { align-items: flex-start; flex-wrap: wrap; }
   .school-year-student .pill { margin-left: 27px; }
 }
+
+/* Students page: sort and filter bar */
+.student-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px; margin: -4px 0 16px; }
+.student-filters label { display: grid; gap: 5px; font-size: 11px; font-weight: 600; color: #cdb39e; }
+.student-filters select { min-width: 150px; padding: 9px 10px; border-radius: 9px; border: 1px solid #ffffff20; background: #e9d5c4; color: #38251a; font-size: 12px; outline: 0; }
+.student-filters select:focus { border-color: #dc9567; box-shadow: 0 0 0 3px #dc95672b; }
+.student-filters .btn { margin-top: 0; }
+.student-count { margin-left: auto; font-size: 11px; color: #cdb39e; padding-bottom: 10px; }
+@media (max-width: 720px) {
+  .student-filters label { flex: 1 1 140px; }
+  .student-filters select { width: 100%; min-width: 0; }
+  .student-count { margin-left: 0; flex-basis: 100%; }
+}
+.student-filters input[type="search"], .student-filters input[type="date"] { min-width: 150px; padding: 9px 10px; border-radius: 9px; border: 1px solid #ffffff20; background: #e9d5c4; color: #38251a; font-size: 12px; outline: 0; }
+.student-filters input:focus { border-color: #dc9567; box-shadow: 0 0 0 3px #dc95672b; }
+@media (max-width: 720px) { .student-filters input[type="search"], .student-filters input[type="date"] { width: 100%; min-width: 0; } }

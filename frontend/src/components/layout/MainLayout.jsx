@@ -40,7 +40,7 @@ export default function MainLayout({ admin, onLogout, children }) {
           <div className="side-brand-logo">
             <img src={PccLogo} alt="Passi City College logo" className="side-brand-logo-image" />
           </div>
-          <div><b>PCC Campus</b><span>Attendance System</span></div>
+          <div><b>SOICT</b><span>Attendance System</span></div>
           <button className="sidebar-close" onClick={() => setOpen(false)} aria-label="Close navigation">
             <X size={20} />
           </button>
@@ -68,7 +68,7 @@ export default function MainLayout({ admin, onLogout, children }) {
             {open ? <X size={21} /> : <Menu size={21} />}
           </button>
           <div className="topbar-brand">
-            <span className="eyebrow">PASSI CITY COLLEGE</span>
+            <span className="eyebrow">BS Information Technology</span>
             <b>Student Event Attendance</b>
           </div>
           <div className="top-right"><ShieldCheck size={17} /><span>Secure admin workspace</span></div>
